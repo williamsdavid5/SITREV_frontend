@@ -1,10 +1,10 @@
 import MenuSuperior from "../components/MenuSuperior"
 
-export default function Motoristas() {
+export default function Alertas() {
     return (
         <>
             <MenuSuperior></MenuSuperior>
-            <h1>Tela motoristas</h1>
+            <h1>Tela alertas</h1>
 
         </>
     )

@@ -1,0 +1,21 @@
+#mainHome {
+    display: flex;
+    height: 100vh;
+    padding-top: 55px;
+    box-sizing: border-box;
+}
+
+.content {
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.janelaLateralPequena {
+    width: 20%;
+    border-right: 3px solid black;
+    box-shadow: 5px 0px 8px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: auto;
+}

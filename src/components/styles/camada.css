@@ -1,0 +1,44 @@
+.camada {
+    background-color: var(--auxiliar);
+    padding: 5px;
+    border-radius: 5px;
+    margin: 5px 0px;
+    color: var(--texto);
+    cursor: auto;
+}
+
+.nomeCamada {
+    display: flex;
+    justify-content: space-between;
+    padding: 0px 5px;
+}
+
+.expandirIcon {
+    width: 20px;
+    object-fit: contain;
+}
+
+.iconExpandido {
+    transform: scale(-1);
+}
+
+.camadaExpandida {
+    background-color: var(--fundo);
+    border-radius: 5px;
+    padding: 5px;
+    margin: 5px;
+    padding-bottom: 15px;
+}
+
+.cercaLista {
+    border-bottom: 2px solid var(--auxiliar);
+    padding: 5px 0px;
+}
+
+.cercaItem {
+    cursor: pointer;
+}
+
+.cercaItem:hover {
+    transform: scale(0.95);
+}
