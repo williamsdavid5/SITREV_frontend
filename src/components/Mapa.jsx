@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -7,6 +7,8 @@ import 'leaflet-draw/dist/leaflet.draw.css';
 import { useRef } from 'react';
 
 import './styles/mapa.css'
+
+import ModalCerca from './ModalCerca';
 
 function ControladorDesenho({ cercas, cercaSelecionada, layerRefs }) {
     const map = useMap();
@@ -39,6 +41,9 @@ function ControladorDesenho({ cercas, cercaSelecionada, layerRefs }) {
                 weight: 2,
                 fillOpacity: 0.4,
             });
+
+            layerRefs.current[cerca.id] = poligono;
+
 
             poligono.bindPopup(`<b>${cerca.nome}</b><br>Máx: ${cerca.velocidade_max} km/h<br>Chuva: ${cerca.velocidade_chuva} km/h`);
             poligono.addTo(map);
@@ -76,6 +81,7 @@ function ControladorDesenho({ cercas, cercaSelecionada, layerRefs }) {
 export default function Mapa({ cercas, cercaSelecionada }) {
 
     const layerRefs = useRef({});
+    const [modalVisivel, setModalVisivel] = useState(true);
 
     return (
         <div className='mapa'>
@@ -83,6 +89,11 @@ export default function Mapa({ cercas, cercaSelecionada }) {
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 <ControladorDesenho cercas={cercas} cercaSelecionada={cercaSelecionada} layerRefs={layerRefs} />
             </MapContainer>
+
+            {modalVisivel && (
+                <ModalCerca setModalVisivel={setModalVisivel} ></ModalCerca>
+            )}
+
         </div>
     );
 }
