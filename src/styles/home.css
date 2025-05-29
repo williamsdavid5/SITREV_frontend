@@ -8,6 +8,7 @@
 .content {
     box-sizing: border-box;
     overflow: hidden;
+    width: 80%;
 }
 
 .janelaLateralPequena {

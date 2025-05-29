@@ -5,6 +5,7 @@ import '../styles/home.css';
 
 import MenuSuperior from "../components/MenuSuperior";
 import Camada from "../components/Camada";
+import Mapa from "../components/Mapa";
 
 import loadingGif from '../assets/loadingGif.gif'
 
@@ -12,13 +13,20 @@ export default function Home() {
 
     const [carregando, setCarregando] = useState(true);
     const [camadas, setCamadas] = useState([]);
+    const [cercas, setcercas] = useState([]);
+
+    const [cercaSelecionada, setCercaSelecionada] = useState(null);
 
     useEffect(() => {
         async function resgatarCamadas() {
             try {
-                const resposta = await api.get('/cercas/camadas/agrupadas');
+                let resposta = await api.get('/cercas/camadas/agrupadas');
                 setCamadas(resposta.data);
-                console.log(camadas);
+                console.log(resposta.data);
+
+                resposta = await api.get('/cercas');
+                setcercas(resposta.data);
+
                 setCarregando(false);
             } catch (err) {
                 console.log('erro ao resgatar cercas: ', err)
@@ -32,7 +40,7 @@ export default function Home() {
         return (
             <div style={{ width: '100%', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
                 <img src={loadingGif} alt="" style={{ width: '50px', marginBottom: '20px' }} />
-                <h1>Carregando dados...</h1>
+                <h2>Carregando dados...</h2>
             </div>
         )
     }
@@ -43,15 +51,17 @@ export default function Home() {
             <main id="mainHome">
                 <div className="janelaLateralPequena">
                     <h2>Camadas</h2>
-                    {Object.entries(camadas).map(([nome, cercas]) => {
-                        return (
-                            <Camada key={nome} nome={nome} cercas={cercas}></Camada>
-                        )
-                    })}
+
+                    {camadas && typeof camadas === 'object' &&
+                        Object.entries(camadas).map(([nome, cercas]) => (
+                            <Camada key={nome} nome={nome} cercas={cercas} selecionarcerca={setCercaSelecionada} />
+                        ))
+                    }
+
 
                 </div>
                 <div className="content">
-
+                    <Mapa cercas={cercas} cercaSelecionada={cercaSelecionada} ></Mapa>
 
                 </div>
 

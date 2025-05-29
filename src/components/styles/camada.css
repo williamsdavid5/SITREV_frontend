@@ -2,9 +2,9 @@
     background-color: var(--auxiliar);
     padding: 5px;
     border-radius: 5px;
-    margin: 5px 0px;
+    margin: 10px 0px;
     color: var(--texto);
-    cursor: auto;
+    cursor: pointer;
 }
 
 .nomeCamada {
