@@ -5,7 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import { useRef } from 'react';
-
+import api from '../server/api';
 import './styles/mapa.css'
 
 import ModalCerca from './ModalCerca';
@@ -52,24 +52,76 @@ function ControladorDesenho({ cercas, cercaSelecionada, layerRefs }) {
                 `);
 
 
-            poligono.addTo(map);
+            drawnItems.addLayer(poligono);
+
         })
 
         // evento de criação de um polígono
-        map.on(L.Draw.Event.CREATED, (event) => {
-            const layer = event.layer;
-            drawnItems.addLayer(layer);
-            const coordinates = layer.getLatLngs();
-            console.log('Coordenadas:', coordinates);
 
-            const desejaSalvar = window.confirm('Deseja salvar esta cerca?');
+        map.on(L.Draw.Event.EDITED, async function (event) {
+            const layers = event.layers;
 
-            if (desejaSalvar) {
+            layers.eachLayer(async function (layer) {
+                const idEncontrado = Object.entries(layerRefs.current).find(([id, ref]) => ref === layer);
 
-            } else {
-                map.removeLayer(layer);
+                if (!idEncontrado) {
+                    console.warn('Cerca editada não encontrada nos refs.');
+                    return;
+                }
+
+                const [cerca_id] = idEncontrado;
+
+                const desejaSalvar = window.confirm('Deseja salvar as alterações desta cerca?');
+
+                if (!desejaSalvar) return;
+
+                const latlngs = layer.getLatLngs()[0]; // array de {lat, lng}
+
+                const coordenadas = latlngs.map(coord => [coord.lat, coord.lng]);
+
+                try {
+                    await api.put(`/pontosCerca/atualizar/${cerca_id}`, { coordenadas });
+                    alert('Cerca atualizada com sucesso!');
+                } catch (err) {
+                    console.error('Erro ao atualizar pontos da cerca:', err);
+                    alert('Erro ao atualizar a cerca.');
+                }
+            });
+        });
+
+        map.on(L.Draw.Event.DELETED, async function (event) {
+            const layers = event.layers;
+
+            const idsParaDeletar = [];
+
+            layers.eachLayer(function (layer) {
+                const idEncontrado = Object.entries(layerRefs.current).find(([id, ref]) => ref === layer);
+
+                if (idEncontrado) {
+                    const [cerca_id] = idEncontrado;
+                    idsParaDeletar.push(cerca_id);
+                }
+            });
+
+            if (idsParaDeletar.length === 0) return;
+
+            const confirmar = window.confirm(`Deseja excluir ${idsParaDeletar.length} cerca(s)?`);
+
+            if (!confirmar) return;
+
+            try {
+                for (const id of idsParaDeletar) {
+                    await api.delete(`/cercas/${id}`);
+                }
+
+                alert('Cerca(s) excluída(s) com sucesso!');
+                window.location.reload();
+            } catch (err) {
+                console.error('Erro ao excluir cerca(s):', err);
+                alert('Erro ao excluir.');
             }
         });
+
 
         map.on('popupopen', function (e) {
             const popupNode = e.popup._contentNode;

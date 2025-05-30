@@ -17,7 +17,7 @@ export default function Home() {
     const [cercas, setcercas] = useState([]);
 
     const [cercaSelecionada, setCercaSelecionada] = useState(null);
-    const [modalVisivel, setModalVisivel] = useState(true);
+    const [modalVisivel, setModalVisivel] = useState(false);
 
     useEffect(() => {
         async function resgatarCamadas() {
