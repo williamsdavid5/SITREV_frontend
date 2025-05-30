@@ -44,10 +44,14 @@ function ControladorDesenho({ cercas, cercaSelecionada, layerRefs }) {
 
             layerRefs.current[cerca.id] = poligono;
 
-
             poligono.bindPopup(`
-                <b>${cerca.nome}</b><br>Máx: ${cerca.velocidade_max} km/h<br>Chuva: ${cerca.velocidade_chuva} km/h<br><button class='botaoEditarCerca'>Editar</button>`
-            );
+                <b>${cerca.nome}</b><br>
+                Máx: ${cerca.velocidade_max} km/h<br>
+                Chuva: ${cerca.velocidade_chuva} km/h<br>
+                <button class='botaoEditarCerca' data-id='${cerca.id}'>Editar</button>
+                `);
+
+
             poligono.addTo(map);
         })
 
@@ -66,6 +70,23 @@ function ControladorDesenho({ cercas, cercaSelecionada, layerRefs }) {
                 map.removeLayer(layer);
             }
         });
+
+        map.on('popupopen', function (e) {
+            const popupNode = e.popup._contentNode;
+            const botaoEditar = popupNode.querySelector('.botaoEditarCerca');
+
+            if (botaoEditar) {
+                botaoEditar.addEventListener('click', () => {
+                    const id = botaoEditar.getAttribute('data-id');
+                    const cerca = cercas.find(c => String(c.id) === id);
+                    if (cerca) {
+                        window.dispatchEvent(new CustomEvent('abrirModalCerca', { detail: cerca }));
+                    }
+                });
+
+            }
+        });
+
     }, [map]);
 
     useEffect(() => {

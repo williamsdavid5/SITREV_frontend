@@ -1,48 +1,106 @@
-import './styles/modalCerca.css'
-import fecharIcon from '../assets/fecharIcon.png'
+import { useEffect, useState } from 'react';
+import './styles/modalCerca.css';
+import fecharIcon from '../assets/fecharIcon.png';
+import api from '../server/api';
 
-export default function ModalCerca({ setModalVisivel }) {
+export default function ModalCerca({ setModalVisivel, cercaSelecionada, camadas }) {
+    const [nome, setNome] = useState('');
+    const [tipo, setTipo] = useState('');
+    const [velocidadeMax, setVelocidadeMax] = useState('');
+    const [velocidadeChuva, setVelocidadeChuva] = useState('');
+    const [cor, setCor] = useState('#0000ff');
+    const [camadaId, setCamadaId] = useState(null);
+
+    useEffect(() => {
+        if (cercaSelecionada) {
+            setNome(cercaSelecionada.nome || '');
+            setTipo(cercaSelecionada.tipo || '');
+            setVelocidadeMax(cercaSelecionada.velocidade_max || '');
+            setVelocidadeChuva(cercaSelecionada.velocidade_chuva || '');
+            setCor(cercaSelecionada.cor || '#0000ff');
+            setCamadaId(cercaSelecionada?.camada?.id ?? null);
+
+        }
+    }, [cercaSelecionada]);
+
+    async function salvarEdicao() {
+        try {
+            const dados = {
+                nome,
+                tipo,
+                velocidade_max: Number(velocidadeMax),
+                velocidade_chuva: Number(velocidadeChuva),
+                cor,
+                camada_id: camadaId
+            };
+
+            await api.put(`/cercas/${cercaSelecionada.id}`, dados);
+
+            alert('Cerca atualizada!');
+            setModalVisivel(false);
+            window.location.reload();
+        } catch (err) {
+            console.log('Erro ao atualizar: ', err);
+            alert('Erro ao salvar edição');
+        }
+    }
+
     return (
         <div className='modalBackground'>
             <div className='modalCercaJanela'>
                 <div className='tituloModal'>
-                    <h2 className='h2_modal'>Cerca</h2>
-                    <img src={fecharIcon} alt="" className='fecharIconModal' onClick={() => setModalVisivel(false)} />
+                    <h2 className='h2_modal'>Editar Cerca</h2>
+                    <img src={fecharIcon} alt="Fechar" className='fecharIconModal' onClick={() => setModalVisivel(false)} />
                 </div>
 
                 <p className='p_modal'>Tipo</p>
-                <select name="" id="" className='selectModal'>
-                    <option value="">Limitador de velocidade</option>
-                    <option value="">Limitador de área</option>
+                <select className='selectModal' value={tipo} onChange={e => setTipo(e.target.value)}>
+                    <option value="limitador_velocidade">Limitador de velocidade</option>
+                    <option value="area_restrita">Área restrita</option>
                 </select>
+
                 <p className='p_modal'>Nome</p>
-                <input type="text" name="" id="" className='inputModal' placeholder='Nome da cerca' />
+                <input type="text" className='inputModal' value={nome} onChange={e => setNome(e.target.value)} />
+
                 <div className='divisaoVertical'>
                     <div className='divisaoVerticalAuxiliar' style={{ marginRight: '15px' }}>
                         <p className='p_modal'>Limite</p>
-                        <input type="text" name="" id="" className='inputModal' placeholder='Km/h' />
+                        <input type="number" className='inputModal' value={velocidadeMax} onChange={e => setVelocidadeMax(e.target.value)} />
                     </div>
                     <div className='divisaoVerticalAuxiliar' style={{ marginLeft: '15px' }}>
                         <p className='p_modal'>Limite na chuva</p>
-                        <input type="text" name="" id="" className='inputModal' placeholder='Km/h' />
+                        <input type="number" className='inputModal' value={velocidadeChuva} onChange={e => setVelocidadeChuva(e.target.value)} />
                     </div>
                 </div>
+
                 <div className='divisaoVertical'>
                     <div className='divisaoVerticalAuxiliar' style={{ marginRight: '15px' }}>
                         <p className='p_modal'>Cor</p>
-                        <input type="color" name="" id="" />
+                        <input type="color" value={cor} onChange={e => setCor(e.target.value)} />
                     </div>
                     <div className='divisaoVerticalAuxiliar' style={{ marginLeft: '15px' }}>
                         <p className='p_modal'>Camada</p>
-                        <select name="" id="" className='selectModal'>
-                            <option value="">Camada 1</option>
-                            <option value="">Camada 2</option>
+
+                        <select
+                            className='selectModal'
+                            value={camadaId !== null && camadaId !== undefined ? camadaId : ''}
+                            onChange={e => {
+                                const idSelecionado = e.target.value ? Number(e.target.value) : null;
+                                setCamadaId(idSelecionado);
+                            }}
+                        >
+                            <option value="">Nenhuma</option>
+                            {camadas.map((camada) => (
+                                <option key={camada.id} value={camada.id}>
+                                    {camada.nome}
+                                </option>
+                            ))}
                         </select>
                     </div>
                 </div>
-                <button className='botaoModal'>Salvar</button>
-            </div>
 
+                <button className='botaoModal' onClick={salvarEdicao}>Salvar</button>
+            </div>
         </div>
-    )
+    );
 }

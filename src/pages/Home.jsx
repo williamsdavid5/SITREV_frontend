@@ -22,8 +22,18 @@ export default function Home() {
     useEffect(() => {
         async function resgatarCamadas() {
             try {
-                let resposta = await api.get('/cercas/camadas/agrupadas');
-                setCamadas(resposta.data);
+
+                let resposta = await api.get('/cercas/camadas');
+                const camadasObj = resposta.data;
+
+                const camadasArray = Object.entries(camadasObj)
+                    .map(([_, camada]) => camada)
+                    .sort((a, b) => a.nome.localeCompare(b.nome));
+
+
+                setCamadas(camadasArray);
+
+
                 console.log(resposta.data);
 
                 resposta = await api.get('/cercas');
@@ -37,6 +47,18 @@ export default function Home() {
 
         resgatarCamadas();
     }, [])
+
+    useEffect(() => {
+        const handler = (e) => {
+            setCercaSelecionada(e.detail);
+            setModalVisivel(true);
+        };
+
+        window.addEventListener('abrirModalCerca', handler);
+
+        return () => window.removeEventListener('abrirModalCerca', handler);
+    }, []);
+
 
     if (carregando) {
         return (
@@ -54,9 +76,14 @@ export default function Home() {
                 <div className="janelaLateralPequena">
                     <h2>Camadas</h2>
 
-                    {camadas && typeof camadas === 'object' &&
-                        Object.entries(camadas).map(([nome, cercas]) => (
-                            <Camada key={nome} nome={nome} cercas={cercas} selecionarcerca={setCercaSelecionada} />
+                    {Array.isArray(camadas) &&
+                        camadas.map((camada) => (
+                            <Camada
+                                key={camada.id}
+                                nome={camada.nome}
+                                cercas={camada.cercas}
+                                selecionarcerca={setCercaSelecionada}
+                            />
                         ))
                     }
 
@@ -66,7 +93,11 @@ export default function Home() {
                     <Mapa cercas={cercas} cercaSelecionada={cercaSelecionada} ></Mapa>
 
                     {modalVisivel && (
-                        <ModalCerca setModalVisivel={setModalVisivel} ></ModalCerca>
+                        <ModalCerca
+                            setModalVisivel={setModalVisivel}
+                            cercaSelecionada={cercaSelecionada}
+                            camadas={camadas}
+                        ></ModalCerca>
                     )}
 
                 </div>
