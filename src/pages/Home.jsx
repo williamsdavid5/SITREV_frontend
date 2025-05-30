@@ -6,6 +6,7 @@ import '../styles/home.css';
 import MenuSuperior from "../components/MenuSuperior";
 import Camada from "../components/Camada";
 import Mapa from "../components/Mapa";
+import ModalCerca from "../components/ModalCerca";
 
 import loadingGif from '../assets/loadingGif.gif'
 
@@ -16,6 +17,7 @@ export default function Home() {
     const [cercas, setcercas] = useState([]);
 
     const [cercaSelecionada, setCercaSelecionada] = useState(null);
+    const [modalVisivel, setModalVisivel] = useState(true);
 
     useEffect(() => {
         async function resgatarCamadas() {
@@ -62,6 +64,10 @@ export default function Home() {
                 </div>
                 <div className="content">
                     <Mapa cercas={cercas} cercaSelecionada={cercaSelecionada} ></Mapa>
+
+                    {modalVisivel && (
+                        <ModalCerca setModalVisivel={setModalVisivel} ></ModalCerca>
+                    )}
 
                 </div>
 

@@ -3,3 +3,14 @@
     width: 100%;
     height: 100%;
 }
+
+.botaoEditarCerca {
+    background-color: var(--destaque2);
+    border: none;
+    border-radius: 20px;
+    padding: 5px;
+    width: 100%;
+    margin-top: 5px;
+    cursor: pointer;
+    color: var(--fundo);
+}
