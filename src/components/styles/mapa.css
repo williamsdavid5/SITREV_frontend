@@ -14,3 +14,53 @@
     cursor: pointer;
     color: var(--fundo);
 }
+
+.leaflet-touch .leaflet-bar a {
+    width: 30px;
+    height: 40px;
+    line-height: 30px;
+}
+
+.leaflet-bar a,
+.leaflet-control-layers-toggle {
+    background-color: var(--fundo);
+    box-shadow: none;
+}
+
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+    border: 3px solid var(--destaque2)
+}
+
+.leaflet-draw-draw-polygon {
+    background-color: white;
+    color: white;
+
+}
+
+.leaflet-marker-icon {
+    width: 15px;
+    height: 15px;
+    border-radius: 20px;
+    border: 4px solid var(--destaque2);
+    background-color: var(--destaque1);
+}
+
+.leaflet-bar {
+    border-radius: 0px;
+}
+
+.leaflet-draw-draw-polygon {
+    fill: white;
+}
+
+.leaflet-draw .leaflet-control a svg path {
+    fill: #ffffff !important;
+}
+
+#tileSelect {
+    position: absolute;
+    z-index: 100000;
+    top: 40px;
+    left: 200px;
+}

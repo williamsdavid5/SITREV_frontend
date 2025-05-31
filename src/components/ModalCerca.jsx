@@ -5,7 +5,7 @@ import api from '../server/api';
 
 export default function ModalCerca({ setModalVisivel, cercaSelecionada, camadas, novaCercaCoordenadas }) {
     const [nome, setNome] = useState('');
-    const [tipo, setTipo] = useState('');
+    const [tipo, setTipo] = useState('limitador_velocidade');
     const [velocidadeMax, setVelocidadeMax] = useState('');
     const [velocidadeChuva, setVelocidadeChuva] = useState('');
     const [cor, setCor] = useState('#0000ff');
