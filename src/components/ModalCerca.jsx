@@ -3,7 +3,7 @@ import './styles/modalCerca.css';
 import fecharIcon from '../assets/fecharIcon.png';
 import api from '../server/api';
 
-export default function ModalCerca({ setModalVisivel, cercaSelecionada, camadas }) {
+export default function ModalCerca({ setModalVisivel, cercaSelecionada, camadas, novaCercaCoordenadas }) {
     const [nome, setNome] = useState('');
     const [tipo, setTipo] = useState('');
     const [velocidadeMax, setVelocidadeMax] = useState('');
@@ -14,36 +14,58 @@ export default function ModalCerca({ setModalVisivel, cercaSelecionada, camadas 
     useEffect(() => {
         if (cercaSelecionada) {
             setNome(cercaSelecionada.nome || '');
-            setTipo(cercaSelecionada.tipo || '');
+
+            const tipoValido = ['limitador_velocidade', 'area_restrita'].includes(cercaSelecionada.tipo)
+                ? cercaSelecionada.tipo
+                : 'limitador_velocidade';
+            setTipo(tipoValido);
+
             setVelocidadeMax(cercaSelecionada.velocidade_max || '');
             setVelocidadeChuva(cercaSelecionada.velocidade_chuva || '');
             setCor(cercaSelecionada.cor || '#0000ff');
             setCamadaId(cercaSelecionada?.camada?.id ?? null);
-
         }
     }, [cercaSelecionada]);
 
+
     async function salvarEdicao() {
         try {
+            console.log(cercaSelecionada);
+            console.log(novaCercaCoordenadas);
+            if (!cercaSelecionada && (!novaCercaCoordenadas || novaCercaCoordenadas.length < 3)) {
+                alert('Desenhe uma cerca com pelo menos 3 pontos antes de salvar.');
+                return;
+            }
+
             const dados = {
                 nome,
                 tipo,
                 velocidade_max: Number(velocidadeMax),
                 velocidade_chuva: Number(velocidadeChuva),
                 cor,
-                camada_id: camadaId
+                camada_id: camadaId,
+                coordenadas: cercaSelecionada ? undefined : novaCercaCoordenadas
             };
 
-            await api.put(`/cercas/${cercaSelecionada.id}`, dados);
+            if (cercaSelecionada) {
+                console.log('editando cerca');
+                await api.put(`/cercas/${cercaSelecionada.id}`, dados);
+                alert('Cerca atualizada!');
+            } else {
+                console.log('criando cerca');
+                console.log(dados);
+                await api.post('/cercas', dados);
+                alert('Cerca criada!');
+            }
 
-            alert('Cerca atualizada!');
             setModalVisivel(false);
             window.location.reload();
         } catch (err) {
-            console.log('Erro ao atualizar: ', err);
+            console.log('Erro ao atualizar: ', err.response?.data || err);
             alert('Erro ao salvar edição');
         }
     }
+
 
     return (
         <div className='modalBackground'>
@@ -54,7 +76,7 @@ export default function ModalCerca({ setModalVisivel, cercaSelecionada, camadas 
                 </div>
 
                 <p className='p_modal'>Tipo</p>
-                <select className='selectModal' value={tipo} onChange={e => setTipo(e.target.value)}>
+                <select className='selectModal' value={tipo} onChange={e => { setTipo(e.target.value); console.log(tipo) }}>
                     <option value="limitador_velocidade">Limitador de velocidade</option>
                     <option value="area_restrita">Área restrita</option>
                 </select>

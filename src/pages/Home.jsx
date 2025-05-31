@@ -97,6 +97,7 @@ export default function Home() {
                             setModalVisivel={setModalVisivel}
                             cercaSelecionada={cercaSelecionada}
                             camadas={camadas}
+                            novaCercaCoordenadas={null}
                         ></ModalCerca>
                     )}
 

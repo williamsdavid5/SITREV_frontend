@@ -10,7 +10,7 @@ import './styles/mapa.css'
 
 import ModalCerca from './ModalCerca';
 
-function ControladorDesenho({ cercas, cercaSelecionada, layerRefs }) {
+function ControladorDesenho({ cercas, cercaSelecionada, layerRefs, setModalVisivel, setNovaCercaCoordenadas }) {
     const map = useMap();
 
     useEffect(() => {
@@ -56,8 +56,18 @@ function ControladorDesenho({ cercas, cercaSelecionada, layerRefs }) {
 
         })
 
-        // evento de criação de um polígono
+        // evento de criação de um poligono
+        map.on(L.Draw.Event.CREATED, function (event) {
+            const layer = event.layer;
+            const latlngs = layer.getLatLngs()[0]; // array de {lat, lng}
+            const coordenadas = latlngs.map(coord => [coord.lat, coord.lng]);
 
+            setNovaCercaCoordenadas(coordenadas);
+            setModalVisivel(true);
+        });
+
+
+        // evento de edição de um poligono
         map.on(L.Draw.Event.EDITED, async function (event) {
             const layers = event.layers;
 
@@ -89,6 +99,7 @@ function ControladorDesenho({ cercas, cercaSelecionada, layerRefs }) {
             });
         });
 
+        // evento de deleção
         map.on(L.Draw.Event.DELETED, async function (event) {
             const layers = event.layers;
 
@@ -122,7 +133,7 @@ function ControladorDesenho({ cercas, cercaSelecionada, layerRefs }) {
             }
         });
 
-
+        // popup das cercas
         map.on('popupopen', function (e) {
             const popupNode = e.popup._contentNode;
             const botaoEditar = popupNode.querySelector('.botaoEditarCerca');
@@ -156,13 +167,47 @@ function ControladorDesenho({ cercas, cercaSelecionada, layerRefs }) {
 export default function Mapa({ cercas, cercaSelecionada }) {
 
     const layerRefs = useRef({});
+    const [modalVisivel, setModalVisivel] = useState(false);
+    const [novaCercaCoordenadas, setNovaCercaCoordenadas] = useState(null);
+    const [camadas, setCamadas] = useState(false);
+
+    useEffect(() => {
+        async function resgatarCamadas() {
+            try {
+
+                let resposta = await api.get('/cercas/camadas');
+                const camadasObj = resposta.data;
+
+                const camadasArray = Object.entries(camadasObj)
+                    .map(([_, camada]) => camada)
+                    .sort((a, b) => a.nome.localeCompare(b.nome));
+
+                setCamadas(camadasArray);
+
+            } catch (err) {
+                console.log('erro ao resgatar camadas no componente mapa: ', err)
+            }
+        }
+
+        resgatarCamadas();
+    }, [])
 
     return (
         <div className='mapa'>
             <MapContainer center={[-3.76, -49.67]} zoom={15} style={{ height: '100vh', width: '100%' }}>
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                <ControladorDesenho cercas={cercas} cercaSelecionada={cercaSelecionada} layerRefs={layerRefs} />
+                <ControladorDesenho cercas={cercas} cercaSelecionada={cercaSelecionada} setModalVisivel={setModalVisivel} layerRefs={layerRefs} setNovaCercaCoordenadas={setNovaCercaCoordenadas} />
             </MapContainer>
+
+            {modalVisivel && (
+                <ModalCerca
+                    setModalVisivel={setModalVisivel}
+                    cercaSelecionada={cercaSelecionada}
+                    novaCercaCoordenadas={novaCercaCoordenadas}
+                    camadas={camadas}
+                />
+            )}
+
         </div>
     );
 }
