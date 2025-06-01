@@ -5,15 +5,15 @@ import expandirIcon from '../assets/expandirIcon.png'
 export default function Camada({ nome, cercas, selecionarcerca }) {
     const [expandido, setExpandido] = useState(false);
     return (
-        <div className="camada">
+        <div className={`camada ${expandido ? 'expandida' : ''}`}>
             <div className='nomeCamada' onClick={() => {
                 setExpandido(!expandido);
             }}>
-                <p>{nome}</p>
                 <img
                     src={expandirIcon} alt=""
                     className={`expandirIcon ${expandido ? 'iconExpandido' : ''}`}
                 />
+                <p>{nome}</p>
             </div>
 
             {expandido && (

@@ -10,7 +10,7 @@ import './styles/mapa.css'
 
 import ModalCerca from './ModalCerca';
 
-function ControladorDesenho({ cercas, cercaSelecionada, layerRefs, setModalVisivel, setNovaCercaCoordenadas }) {
+function ControladorDesenho({ cercas, cercaSelecionada, layerRefs, setModalVisivel, setNovaCercaCoordenadas, setCercaSelecionada }) {
     const map = useMap();
 
     useEffect(() => {
@@ -143,6 +143,7 @@ function ControladorDesenho({ cercas, cercaSelecionada, layerRefs, setModalVisiv
                     const id = botaoEditar.getAttribute('data-id');
                     const cerca = cercas.find(c => String(c.id) === id);
                     if (cerca) {
+                        setCercaSelecionada(cerca);
                         window.dispatchEvent(new CustomEvent('abrirModalCerca', { detail: cerca }));
                     }
                 });
@@ -164,7 +165,7 @@ function ControladorDesenho({ cercas, cercaSelecionada, layerRefs, setModalVisiv
     return null;
 }
 
-export default function Mapa({ cercas, cercaSelecionada }) {
+export default function Mapa({ cercas, cercaSelecionada, setCercaSelecionada }) {
 
     const layerRefs = useRef({});
     const [modalVisivel, setModalVisivel] = useState(false);
@@ -203,7 +204,14 @@ export default function Mapa({ cercas, cercaSelecionada }) {
                 />
 
 
-                <ControladorDesenho cercas={cercas} cercaSelecionada={cercaSelecionada} setModalVisivel={setModalVisivel} layerRefs={layerRefs} setNovaCercaCoordenadas={setNovaCercaCoordenadas} />
+                <ControladorDesenho
+                    cercas={cercas}
+                    setCercaSelecionada={setCercaSelecionada}
+                    cercaSelecionada={cercaSelecionada}
+                    setModalVisivel={setModalVisivel}
+                    layerRefs={layerRefs}
+                    setNovaCercaCoordenadas={setNovaCercaCoordenadas}
+                />
             </MapContainer>
 
             {modalVisivel && (
@@ -212,6 +220,7 @@ export default function Mapa({ cercas, cercaSelecionada }) {
                     cercaSelecionada={cercaSelecionada}
                     novaCercaCoordenadas={novaCercaCoordenadas}
                     camadas={camadas}
+                    setCercaSelecionada={setCercaSelecionada}
                 />
             )}
 

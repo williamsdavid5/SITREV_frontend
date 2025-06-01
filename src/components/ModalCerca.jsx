@@ -3,7 +3,7 @@ import './styles/modalCerca.css';
 import fecharIcon from '../assets/fecharIcon.png';
 import api from '../server/api';
 
-export default function ModalCerca({ setModalVisivel, cercaSelecionada, camadas, novaCercaCoordenadas }) {
+export default function ModalCerca({ setModalVisivel, cercaSelecionada, camadas, novaCercaCoordenadas, setCercaSelecionada }) {
     const [nome, setNome] = useState('');
     const [tipo, setTipo] = useState('limitador_velocidade');
     const [velocidadeMax, setVelocidadeMax] = useState('');
@@ -71,8 +71,10 @@ export default function ModalCerca({ setModalVisivel, cercaSelecionada, camadas,
         <div className='modalBackground'>
             <div className='modalCercaJanela'>
                 <div className='tituloModal'>
-                    <h2 className='h2_modal'>Editar Cerca</h2>
-                    <img src={fecharIcon} alt="Fechar" className='fecharIconModal' onClick={() => setModalVisivel(false)} />
+                    <h2 className='h2_modal'>
+                        {cercaSelecionada ? 'Editar cerca' : 'Nova cerca'}
+                    </h2>
+                    <img src={fecharIcon} alt="Fechar" className='fecharIconModal' onClick={() => { setCercaSelecionada(null); setModalVisivel(false) }} />
                 </div>
 
                 <p className='p_modal'>Tipo</p>

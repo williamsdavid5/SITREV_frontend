@@ -1,7 +1,7 @@
 #mainHome {
     display: flex;
     height: 100vh;
-    padding-top: 55px;
+    padding-top: 45px;
     box-sizing: border-box;
 }
 
@@ -9,14 +9,31 @@
     box-sizing: border-box;
     overflow: hidden;
     width: 80%;
+    border-top-left-radius: 20px;
+    /* border-bottom-left-radius: 20px; */
 }
 
 .janelaLateralPequena {
     width: 20%;
-    border-right: 3px solid black;
-    box-shadow: 5px 0px 8px rgba(0, 0, 0, 0.1);
-    padding: 10px;
+    /* border-right: 3px solid black; */
+    /* box-shadow: 5px 0px 8px rgba(0, 0, 0, 0.1); */
+    /* background: var(--gradientClaro); */
     box-sizing: border-box;
     overflow-x: hidden;
     overflow-y: auto;
+}
+
+.divTituloCamadas {
+    margin: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.botaoNovaCamada {
+    background-color: var(--destaque2);
+    color: var(--fundo);
+    border: none;
+    border-radius: 5px;
+    padding: 5px 20px;
+    cursor: pointer;
 }

@@ -1,44 +1,52 @@
 .camada {
-    background-color: var(--auxiliar);
-    padding: 5px;
-    border-radius: 5px;
-    margin: 10px 0px;
-    color: var(--texto);
+    /* background: var(--gradientEscuro); */
+    padding: 20px 10px;
+    color: var(--destaque2);
     cursor: pointer;
+    border-top: 1px solid rgba(0, 0, 0, 0.2);
+    /* font-weight: bold; */
 }
 
 .nomeCamada {
     display: flex;
-    justify-content: space-between;
     padding: 0px 5px;
 }
 
 .expandirIcon {
-    width: 20px;
+    width: 13px;
     object-fit: contain;
+    margin-right: 10px;
 }
 
 .iconExpandido {
     transform: scale(-1);
 }
 
+.camada.expandida {
+    background-color: white;
+    /* border: 1px solid rgba(0, 0, 0, 0.2); */
+}
+
 .camadaExpandida {
-    background-color: var(--fundo);
-    border-radius: 5px;
+    color: var(--texto);
+    /* border-left: solid 3px rgb(0, 0, 0); */
     padding: 5px;
-    margin: 5px;
-    padding-bottom: 15px;
+    margin-top: 10px;
+    font-weight: normal;
 }
 
 .cercaLista {
-    border-bottom: 2px solid var(--auxiliar);
-    padding: 5px 0px;
+    /* border-bottom: 1px solid var(--destaque1); */
+    padding: 5px 10px;
 }
 
 .cercaItem {
     cursor: pointer;
+    padding: 2px;
 }
 
 .cercaItem:hover {
-    transform: scale(0.95);
+    background-color: var(--destaque1);
+    color: var(--fundo);
+    border-radius: 5px;
 }

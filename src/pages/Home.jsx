@@ -71,11 +71,12 @@ export default function Home() {
 
     return (
         <>
-            <MenuSuperior></MenuSuperior>
             <main id="mainHome">
                 <div className="janelaLateralPequena">
-                    <h2>Camadas</h2>
-
+                    <div className="divTituloCamadas">
+                        <h2>Camadas</h2>
+                        <button className="botaoNovaCamada">Nova</button>
+                    </div>
                     {Array.isArray(camadas) &&
                         camadas.map((camada) => (
                             <Camada
@@ -90,7 +91,7 @@ export default function Home() {
 
                 </div>
                 <div className="content">
-                    <Mapa cercas={cercas} cercaSelecionada={cercaSelecionada} ></Mapa>
+                    <Mapa cercas={cercas} cercaSelecionada={cercaSelecionada} setCercaSelecionada={setCercaSelecionada} ></Mapa>
 
                     {modalVisivel && (
                         <ModalCerca
@@ -98,12 +99,14 @@ export default function Home() {
                             cercaSelecionada={cercaSelecionada}
                             camadas={camadas}
                             novaCercaCoordenadas={null}
+                            setCercaSelecionada={setCercaSelecionada}
                         ></ModalCerca>
                     )}
 
                 </div>
 
             </main>
+            <MenuSuperior></MenuSuperior>
         </>
     )
 }
