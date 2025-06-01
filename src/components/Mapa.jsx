@@ -172,6 +172,46 @@ export default function Mapa({ cercas, cercaSelecionada, setCercaSelecionada }) 
     const [novaCercaCoordenadas, setNovaCercaCoordenadas] = useState(null);
     const [camadas, setCamadas] = useState(false);
 
+    const [currentProvider, setCurrentProvider] = useState('stadia');
+    const mapProviders = {
+        stadia: {
+            name: "Satélite",
+            url: "https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg",
+            attribution: '© CNES, Distribution Airbus DS, © Airbus DS, © PlanetObserver (Contains Copernicus Data) | © <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> © <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 20
+        },
+        openstreetmap: {
+            name: "Padrão",
+            url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19
+        },
+        cyclosm: {
+            name: "CyclOSM",
+            url: "https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png",
+            attribution: '<a href="https://github.com/cyclosm/cyclosm-cartocss-style/releases" title="CyclOSM - Open Bicycle render">CyclOSM</a> | Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 20
+        },
+        memomaps: {
+            name: "Memomaps",
+            url: "https://tileserver.memomaps.de/tilegen/{z}/{x}/{y}.png",
+            attribution: 'Map <a href="https://memomaps.de/">memomaps.de</a> <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 18
+        },
+        opentopomap: {
+            name: "OpenTopoMap",
+            url: "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+            attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)',
+            maxZoom: 17
+        },
+        mtbmap: {
+            name: "black and white",
+            url: "https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}{r}.png",
+            attribution: '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://www.stamen.com/" target="_blank">Stamen Design</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 20
+        }
+    };
+
     useEffect(() => {
         async function resgatarCamadas() {
             try {
@@ -196,11 +236,38 @@ export default function Mapa({ cercas, cercaSelecionada, setCercaSelecionada }) 
     return (
         <div className='mapa'>
             <MapContainer center={[-3.76, -49.67]} zoom={15} style={{ height: '100vh', width: '100%' }}>
-                <TileLayer
+                {/* <TileLayer
                     url="https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg"
                     minZoom={0}
                     maxZoom={20}
                     attribution='© CNES, Distribution Airbus DS, © Airbus DS, © PlanetObserver (Contains Copernicus Data) | © <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> © <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                /> */}
+
+                {/* <TileLayer
+                    url="https://tile.osm.ch/switzerland/{z}/{x}/{y}.png"
+                    maxZoom={18}
+                    bounds={[[45, 5], [48, 11]]}
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                /> */}
+
+                {/* <TileLayer
+                    url="https://tileserver.memomaps.de/tilegen/{z}/{x}/{y}.png"
+                    maxZoom={18}
+                    attribution='Map <a href="https://memomaps.de/">memomaps.de</a> <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                /> */}
+
+                {/* <TileLayer
+                    url="https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}{r}.png"
+                    minZoom={0}
+                    maxZoom={20}
+                    attribution='&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://www.stamen.com/" target="_blank">Stamen Design</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                /> */}
+
+                <TileLayer
+                    key={currentProvider} // Isso força recriação ao mudar
+                    url={mapProviders[currentProvider].url}
+                    maxZoom={mapProviders[currentProvider].maxZoom}
+                    attribution={mapProviders[currentProvider].attribution}
                 />
 
 
@@ -223,6 +290,20 @@ export default function Mapa({ cercas, cercaSelecionada, setCercaSelecionada }) 
                     setCercaSelecionada={setCercaSelecionada}
                 />
             )}
+
+            <select
+                name="providerSelect"
+                id="providerSelect"
+                value={currentProvider}
+                onChange={(e) => setCurrentProvider(e.target.value)}
+                className="map-provider-select"
+            >
+                {Object.entries(mapProviders).map(([id, provider]) => (
+                    <option key={id} value={id}>
+                        {provider.name}
+                    </option>
+                ))}
+            </select>
 
         </div>
     );
