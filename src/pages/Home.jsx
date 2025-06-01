@@ -125,16 +125,14 @@ export default function Home() {
                             }}>Cancelar</button>
                         </div>
                     )}
-                    {Array.isArray(camadas) &&
-                        camadas.map((camada) => (
-                            <Camada
-                                key={camada.id}
-                                nome={camada.nome}
-                                cercas={camada.cercas}
-                                selecionarcerca={setCercaSelecionada}
-                            />
-                        ))
-                    }
+                    {(Array.isArray(camadas) ? camadas : []).map((camada) => (
+                        <Camada
+                            key={camada?.id || Math.random()}
+                            nome={camada?.nome || ''}
+                            cercas={camada?.cercas || []}
+                            selecionarcerca={setCercaSelecionada}
+                        />
+                    ))}
 
 
                 </div>

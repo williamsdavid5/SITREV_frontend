@@ -10,7 +10,14 @@ import './styles/mapa.css'
 
 import ModalCerca from './ModalCerca';
 
-function ControladorDesenho({ cercas, cercaSelecionada, layerRefs, setModalVisivel, setNovaCercaCoordenadas, setCercaSelecionada }) {
+function ControladorDesenho({
+    cercas,
+    cercaSelecionada,
+    layerRefs,
+    setModalVisivel,
+    setNovaCercaCoordenadas,
+    setCercaSelecionada
+}) {
     const map = useMap();
 
     useEffect(() => {
@@ -25,70 +32,37 @@ function ControladorDesenho({ cercas, cercaSelecionada, layerRefs, setModalVisiv
                 polyline: false,
                 rectangle: false,
                 circle: false,
-                marker: false,
+                marker: false
             },
             edit: {
-                featureGroup: drawnItems,
-            },
+                featureGroup: drawnItems
+            }
         });
 
         map.addControl(drawControl);
         map._drawControlAdded = true;
 
-        cercas.forEach(cerca => {
-            const poligono = L.polygon(cerca.coordenadas, {
-                color: cerca.cor || 'blue',
-                weight: 2,
-                fillOpacity: 0.4,
-            });
+        map._drawnItems = drawnItems;
 
-            layerRefs.current[cerca.id] = poligono;
-
-            poligono.bindPopup(`
-                <b>${cerca.nome}</b><br>
-                Máx: ${cerca.velocidade_max} km/h<br>
-                Chuva: ${cerca.velocidade_chuva} km/h<br>
-                <button class='botaoEditarCerca' data-id='${cerca.id}'>Editar</button>
-                `);
-
-
-            drawnItems.addLayer(poligono);
-
-        })
-
-        // evento de criação de um poligono
         map.on(L.Draw.Event.CREATED, function (event) {
             const layer = event.layer;
-            const latlngs = layer.getLatLngs()[0]; // array de {lat, lng}
+            const latlngs = layer.getLatLngs()[0];
             const coordenadas = latlngs.map(coord => [coord.lat, coord.lng]);
-
             setNovaCercaCoordenadas(coordenadas);
             setModalVisivel(true);
         });
 
-
-        // evento de edição de um poligono
         map.on(L.Draw.Event.EDITED, async function (event) {
             const layers = event.layers;
 
             layers.eachLayer(async function (layer) {
                 const idEncontrado = Object.entries(layerRefs.current).find(([id, ref]) => ref === layer);
-
-                if (!idEncontrado) {
-                    console.warn('Cerca editada não encontrada nos refs.');
-                    return;
-                }
-
+                if (!idEncontrado) return;
                 const [cerca_id] = idEncontrado;
-
                 const desejaSalvar = window.confirm('Deseja salvar as alterações desta cerca?');
-
                 if (!desejaSalvar) return;
-
-                const latlngs = layer.getLatLngs()[0]; // array de {lat, lng}
-
+                const latlngs = layer.getLatLngs()[0];
                 const coordenadas = latlngs.map(coord => [coord.lat, coord.lng]);
-
                 try {
                     await api.put(`/pontosCerca/atualizar/${cerca_id}`, { coordenadas });
                     alert('Cerca atualizada com sucesso!');
@@ -99,15 +73,12 @@ function ControladorDesenho({ cercas, cercaSelecionada, layerRefs, setModalVisiv
             });
         });
 
-        // evento de deleção
         map.on(L.Draw.Event.DELETED, async function (event) {
             const layers = event.layers;
-
             const idsParaDeletar = [];
 
             layers.eachLayer(function (layer) {
                 const idEncontrado = Object.entries(layerRefs.current).find(([id, ref]) => ref === layer);
-
                 if (idEncontrado) {
                     const [cerca_id] = idEncontrado;
                     idsParaDeletar.push(cerca_id);
@@ -117,43 +88,67 @@ function ControladorDesenho({ cercas, cercaSelecionada, layerRefs, setModalVisiv
             if (idsParaDeletar.length === 0) return;
 
             const confirmar = window.confirm(`Deseja excluir ${idsParaDeletar.length} cerca(s)?`);
-
             if (!confirmar) return;
 
             try {
                 for (const id of idsParaDeletar) {
                     await api.delete(`/cercas/${id}`);
                 }
-
                 alert('Cerca(s) excluída(s) com sucesso!');
-                // window.dispatchEvent(new Event('atualizarCercas'));
-                window.location.reload();
             } catch (err) {
                 console.error('Erro ao excluir cerca(s):', err);
                 alert('Erro ao excluir.');
             }
         });
+    }, [map]);
 
-        // popup das cercas
-        map.on('popupopen', function (e) {
-            const popupNode = e.popup._contentNode;
-            const botaoEditar = popupNode.querySelector('.botaoEditarCerca');
+    useEffect(() => {
+        function handleClick(event) {
+            const botao = event.target.closest('.botaoEditarCerca');
+            if (!botao) return;
 
-            if (botaoEditar) {
-                botaoEditar.addEventListener('click', () => {
-                    const id = botaoEditar.getAttribute('data-id');
-                    const cerca = cercas.find(c => String(c.id) === id);
-                    if (cerca) {
-                        setCercaSelecionada(cerca);
-                        window.dispatchEvent(new CustomEvent('abrirModalCerca', { detail: cerca }));
-                    }
-                });
-
+            const id = botao.getAttribute('data-id');
+            const cerca = cercas.find(c => String(c.id) === id);
+            if (cerca) {
+                setCercaSelecionada(cerca);
+                window.dispatchEvent(new CustomEvent('abrirModalCerca', { detail: cerca }));
             }
+        }
+
+        document.addEventListener('click', handleClick);
+        return () => {
+            document.removeEventListener('click', handleClick);
+        };
+    }, [cercas]);
+
+
+    // 🔁 Atualiza o mapa sempre que 'cercas' mudar
+    useEffect(() => {
+        const drawnItems = map._drawnItems;
+        if (!drawnItems) return;
+
+        drawnItems.clearLayers();
+        layerRefs.current = {};
+
+        cercas.forEach(cerca => {
+            const poligono = L.polygon(cerca.coordenadas, {
+                color: cerca.cor || 'blue',
+                weight: 2,
+                fillOpacity: 0.4
+            });
+
+            layerRefs.current[cerca.id] = poligono;
+
+            poligono.bindPopup(`
+        <b>${cerca.nome}</b><br>
+        Máx: ${cerca.velocidade_max} km/h<br>
+        Chuva: ${cerca.velocidade_chuva} km/h<br>
+        <button class='botaoEditarCerca' data-id='${cerca.id}'>Editar</button>
+      `);
+
+            drawnItems.addLayer(poligono);
         });
-
     }, [cercas, map]);
-
 
     useEffect(() => {
         if (cercaSelecionada && layerRefs.current[cercaSelecionada.id]) {
@@ -163,11 +158,12 @@ function ControladorDesenho({ cercas, cercaSelecionada, layerRefs, setModalVisiv
         }
     }, [cercaSelecionada, map]);
 
-
     return null;
-}
+};
 
-export default function Mapa({ cercas: initialCercas, cercaSelecionada, setCercaSelecionada }) {
+// export default ControladorDesenho;
+
+export default function Mapa({ cercas, cercaSelecionada, setCercaSelecionada }) {
 
     const layerRefs = useRef({});
     const [modalVisivel, setModalVisivel] = useState(false);
@@ -214,45 +210,24 @@ export default function Mapa({ cercas: initialCercas, cercaSelecionada, setCerca
         }
     };
 
-    const [cercas, setCercas] = useState(initialCercas);
-
     useEffect(() => {
-        setCercas(initialCercas);
-    }, [initialCercas]);
+        async function resgatarCamadas() {
+            try {
 
-    const atualizarCercas = async () => {
-        try {
-            const resposta = await api.get('/cercas');
-            setCercas(resposta.data);
-        } catch (err) {
-            console.error('Erro ao atualizar cercas:', err);
+                let resposta = await api.get('/cercas/camadas');
+                const camadasObj = resposta.data;
+
+                const camadasArray = Object.entries(camadasObj)
+                    .map(([_, camada]) => camada)
+                    .sort((a, b) => a.nome.localeCompare(b.nome));
+
+                setCamadas(camadasArray);
+
+            } catch (err) {
+                console.log('erro ao resgatar camadas no componente mapa: ', err)
+            }
         }
-    };
 
-    useEffect(() => {
-        const handler = () => atualizarCercas();
-        window.addEventListener('atualizarCercas', handler);
-        return () => window.removeEventListener('atualizarCercas', handler);
-    }, []);
-
-    async function resgatarCamadas() {
-        try {
-
-            let resposta = await api.get('/cercas/camadas');
-            const camadasObj = resposta.data;
-
-            const camadasArray = Object.entries(camadasObj)
-                .map(([_, camada]) => camada)
-                .sort((a, b) => a.nome.localeCompare(b.nome));
-
-            setCamadas(camadasArray);
-
-        } catch (err) {
-            console.log('erro ao resgatar camadas no componente mapa: ', err)
-        }
-    }
-
-    useEffect(() => {
         resgatarCamadas();
     }, [])
 
