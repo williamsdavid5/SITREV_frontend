@@ -58,8 +58,9 @@ export default function ModalCerca({ setModalVisivel, cercaSelecionada, camadas,
                 alert('Cerca criada!');
             }
 
+            window.dispatchEvent(new Event('atualizarCercas'));
             setModalVisivel(false);
-            window.location.reload();
+            // window.location.reload();
         } catch (err) {
             console.log('Erro ao atualizar: ', err.response?.data || err);
             alert('Erro ao salvar edição');

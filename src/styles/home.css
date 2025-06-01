@@ -37,3 +37,44 @@
     padding: 5px 20px;
     cursor: pointer;
 }
+
+.botaoNovaCamada:hover {
+    transform: scale(1.02);
+}
+
+.novaCamada {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    background-color: var(--auxiliar2);
+    padding: 10px 0px;
+    margin: 10px;
+    border-radius: 10px;
+}
+
+.novaCamada input {
+    background-color: white;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    padding: 4px;
+    width: 80%;
+    border-radius: 8px;
+    margin: 8px 0px;
+}
+
+.novaCamada button:hover {
+    transform: scale(1.02);
+}
+
+.novaCamada button {
+    width: 80%;
+    padding: 4px;
+    border-radius: 8px;
+    border: none;
+}
+
+.botaoSalvarNovaCamada {
+    background-color: var(--destaque2);
+    color: var(--fundo);
+    margin-bottom: 8px;
+}

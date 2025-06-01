@@ -126,6 +126,7 @@ function ControladorDesenho({ cercas, cercaSelecionada, layerRefs, setModalVisiv
                 }
 
                 alert('Cerca(s) excluída(s) com sucesso!');
+                // window.dispatchEvent(new Event('atualizarCercas'));
                 window.location.reload();
             } catch (err) {
                 console.error('Erro ao excluir cerca(s):', err);
@@ -151,7 +152,8 @@ function ControladorDesenho({ cercas, cercaSelecionada, layerRefs, setModalVisiv
             }
         });
 
-    }, [map]);
+    }, [cercas, map]);
+
 
     useEffect(() => {
         if (cercaSelecionada && layerRefs.current[cercaSelecionada.id]) {
@@ -165,7 +167,7 @@ function ControladorDesenho({ cercas, cercaSelecionada, layerRefs, setModalVisiv
     return null;
 }
 
-export default function Mapa({ cercas, cercaSelecionada, setCercaSelecionada }) {
+export default function Mapa({ cercas: initialCercas, cercaSelecionada, setCercaSelecionada }) {
 
     const layerRefs = useRef({});
     const [modalVisivel, setModalVisivel] = useState(false);
@@ -212,64 +214,57 @@ export default function Mapa({ cercas, cercaSelecionada, setCercaSelecionada }) 
         }
     };
 
+    const [cercas, setCercas] = useState(initialCercas);
+
     useEffect(() => {
-        async function resgatarCamadas() {
-            try {
+        setCercas(initialCercas);
+    }, [initialCercas]);
 
-                let resposta = await api.get('/cercas/camadas');
-                const camadasObj = resposta.data;
-
-                const camadasArray = Object.entries(camadasObj)
-                    .map(([_, camada]) => camada)
-                    .sort((a, b) => a.nome.localeCompare(b.nome));
-
-                setCamadas(camadasArray);
-
-            } catch (err) {
-                console.log('erro ao resgatar camadas no componente mapa: ', err)
-            }
+    const atualizarCercas = async () => {
+        try {
+            const resposta = await api.get('/cercas');
+            setCercas(resposta.data);
+        } catch (err) {
+            console.error('Erro ao atualizar cercas:', err);
         }
+    };
 
+    useEffect(() => {
+        const handler = () => atualizarCercas();
+        window.addEventListener('atualizarCercas', handler);
+        return () => window.removeEventListener('atualizarCercas', handler);
+    }, []);
+
+    async function resgatarCamadas() {
+        try {
+
+            let resposta = await api.get('/cercas/camadas');
+            const camadasObj = resposta.data;
+
+            const camadasArray = Object.entries(camadasObj)
+                .map(([_, camada]) => camada)
+                .sort((a, b) => a.nome.localeCompare(b.nome));
+
+            setCamadas(camadasArray);
+
+        } catch (err) {
+            console.log('erro ao resgatar camadas no componente mapa: ', err)
+        }
+    }
+
+    useEffect(() => {
         resgatarCamadas();
     }, [])
 
     return (
         <div className='mapa'>
             <MapContainer center={[-3.76, -49.67]} zoom={15} style={{ height: '100vh', width: '100%' }}>
-                {/* <TileLayer
-                    url="https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg"
-                    minZoom={0}
-                    maxZoom={20}
-                    attribution='© CNES, Distribution Airbus DS, © Airbus DS, © PlanetObserver (Contains Copernicus Data) | © <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> © <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                /> */}
-
-                {/* <TileLayer
-                    url="https://tile.osm.ch/switzerland/{z}/{x}/{y}.png"
-                    maxZoom={18}
-                    bounds={[[45, 5], [48, 11]]}
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                /> */}
-
-                {/* <TileLayer
-                    url="https://tileserver.memomaps.de/tilegen/{z}/{x}/{y}.png"
-                    maxZoom={18}
-                    attribution='Map <a href="https://memomaps.de/">memomaps.de</a> <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                /> */}
-
-                {/* <TileLayer
-                    url="https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}{r}.png"
-                    minZoom={0}
-                    maxZoom={20}
-                    attribution='&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://www.stamen.com/" target="_blank">Stamen Design</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                /> */}
-
                 <TileLayer
-                    key={currentProvider} // Isso força recriação ao mudar
+                    key={currentProvider}
                     url={mapProviders[currentProvider].url}
                     maxZoom={mapProviders[currentProvider].maxZoom}
                     attribution={mapProviders[currentProvider].attribution}
                 />
-
 
                 <ControladorDesenho
                     cercas={cercas}

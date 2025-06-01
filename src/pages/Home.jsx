@@ -19,32 +19,41 @@ export default function Home() {
     const [cercaSelecionada, setCercaSelecionada] = useState(null);
     const [modalVisivel, setModalVisivel] = useState(false);
 
-    useEffect(() => {
-        async function resgatarCamadas() {
-            try {
+    const [popUpNovaCamada, setPopUpNovaCamada] = useState(false);
 
-                let resposta = await api.get('/cercas/camadas');
-                const camadasObj = resposta.data;
+    async function resgatarCamadas() {
+        try {
 
-                const camadasArray = Object.entries(camadasObj)
-                    .map(([_, camada]) => camada)
-                    .sort((a, b) => a.nome.localeCompare(b.nome));
+            let resposta = await api.get('/cercas/camadas');
+            const camadasObj = resposta.data;
 
-
-                setCamadas(camadasArray);
+            const camadasArray = Object.entries(camadasObj)
+                .map(([_, camada]) => camada)
+                .sort((a, b) => a.nome.localeCompare(b.nome));
 
 
-                console.log(resposta.data);
+            setCamadas(camadasArray);
 
-                resposta = await api.get('/cercas');
-                setcercas(resposta.data);
 
-                setCarregando(false);
-            } catch (err) {
-                console.log('erro ao resgatar cercas: ', err)
-            }
+            console.log(resposta.data);
+
+            resposta = await api.get('/cercas');
+            setcercas(resposta.data);
+
+            setCarregando(false);
+        } catch (err) {
+            console.log('erro ao resgatar cercas: ', err)
         }
+    }
 
+    useEffect(() => {
+        const atualizar = () => resgatarCamadas();
+        window.addEventListener('atualizarCercas', atualizar);
+        return () => window.removeEventListener('atualizarCercas', atualizar);
+    }, []);
+
+
+    useEffect(() => {
         resgatarCamadas();
     }, [])
 
@@ -59,6 +68,31 @@ export default function Home() {
         return () => window.removeEventListener('abrirModalCerca', handler);
     }, []);
 
+    async function criarNovaCamada() {
+        try {
+            const nome = document.getElementById('nomeNovaCamada').value;
+
+            if (nome == '') {
+                alert('Dê algum nome!!');
+                return;
+            }
+
+            const dado = {
+                nome
+            }
+
+            console.log(dado);
+
+            await api.post(`/camadas`, dado);
+            alert('Camada criada!');
+            resgatarCamadas();
+            setPopUpNovaCamada(false);
+
+        } catch (err) {
+            console.log('Erro ao criar nova camada: ', err);
+            alert('Erro ao criar a nova camada!');
+        }
+    }
 
     if (carregando) {
         return (
@@ -75,8 +109,22 @@ export default function Home() {
                 <div className="janelaLateralPequena">
                     <div className="divTituloCamadas">
                         <h2>Camadas</h2>
-                        <button className="botaoNovaCamada">Nova</button>
+                        <button className="botaoNovaCamada" onClick={() => {
+                            setPopUpNovaCamada(true)
+                        }}>Nova</button>
                     </div>
+                    {popUpNovaCamada && (
+                        <div className="novaCamada">
+                            <p>Nova Camada</p>
+                            <input type="text" name="nomaNovaCamada" id="nomeNovaCamada" placeholder="Nome" />
+                            <button className="botaoSalvarNovaCamada" onClick={() => {
+                                criarNovaCamada();
+                            }}>Salvar</button>
+                            <button onClick={() => {
+                                setPopUpNovaCamada(false)
+                            }}>Cancelar</button>
+                        </div>
+                    )}
                     {Array.isArray(camadas) &&
                         camadas.map((camada) => (
                             <Camada
@@ -102,7 +150,6 @@ export default function Home() {
                             setCercaSelecionada={setCercaSelecionada}
                         ></ModalCerca>
                     )}
-
                 </div>
 
             </main>
