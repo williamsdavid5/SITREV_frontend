@@ -1,0 +1,10 @@
+.loadingGif {
+    width: 60px;
+    object-fit: contain;
+}
+
+/*As outras configurações estão em home.css*/
+.modalAplicandoMudancas {
+    flex-direction: column;
+    color: white;
+}

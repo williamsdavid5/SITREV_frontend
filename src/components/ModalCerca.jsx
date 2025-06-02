@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import './styles/modalCerca.css';
 import fecharIcon from '../assets/fecharIcon.png';
 import api from '../server/api';
+
+import ModalAplicandoMudancas from './ModalAplicandoMudancas';
 
 export default function ModalCerca({ setModalVisivel, cercaSelecionada, camadas, novaCercaCoordenadas, setCercaSelecionada }) {
     const [nome, setNome] = useState('');
@@ -10,6 +12,8 @@ export default function ModalCerca({ setModalVisivel, cercaSelecionada, camadas,
     const [velocidadeChuva, setVelocidadeChuva] = useState('');
     const [cor, setCor] = useState('#0000ff');
     const [camadaId, setCamadaId] = useState(null);
+
+    const [aplicandoMudancas, setAplicandoMudancas] = useState(false);
 
     useEffect(() => {
         if (cercaSelecionada) {
@@ -30,13 +34,11 @@ export default function ModalCerca({ setModalVisivel, cercaSelecionada, camadas,
 
     async function salvarEdicao() {
         try {
-            console.log(cercaSelecionada);
-            console.log(novaCercaCoordenadas);
             if (!cercaSelecionada && (!novaCercaCoordenadas || novaCercaCoordenadas.length < 3)) {
                 alert('Desenhe uma cerca com pelo menos 3 pontos antes de salvar.');
                 return;
             }
-
+            setAplicandoMudancas(true);
             const dados = {
                 nome,
                 tipo,
@@ -59,11 +61,14 @@ export default function ModalCerca({ setModalVisivel, cercaSelecionada, camadas,
             }
 
             window.dispatchEvent(new Event('atualizarCercas'));
+            setAplicandoMudancas(false);
+            setCercaSelecionada(null);
             setModalVisivel(false);
             // window.location.reload();
         } catch (err) {
             console.log('Erro ao atualizar: ', err.response?.data || err);
             alert('Erro ao salvar edição');
+            setAplicandoMudancas(false);
         }
     }
 
@@ -126,6 +131,10 @@ export default function ModalCerca({ setModalVisivel, cercaSelecionada, camadas,
 
                 <button className='botaoModal' onClick={salvarEdicao}>Salvar</button>
             </div>
+
+            {aplicandoMudancas && (
+                <ModalAplicandoMudancas></ModalAplicandoMudancas>
+            )}
         </div>
     );
 }

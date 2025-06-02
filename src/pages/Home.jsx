@@ -8,22 +8,29 @@ import Camada from "../components/Camada";
 import Mapa from "../components/Mapa";
 import ModalCerca from "../components/ModalCerca";
 import ModalEditarCamada from "../components/ModalEditarCamada";
+import ModalAplicandoMudancas from "../components/ModalAplicandoMudancas";
+import ModalCarregandoDados from "../components/ModalCarregandoDados";
 
 import loadingGif from '../assets/loadingGif.gif'
 
 export default function Home() {
 
-    const [carregando, setCarregando] = useState(true);
+    const [carregando, setCarregando] = useState(true); //para mostrar o loading
+    //para armazenar os dados do banco de dados
     const [camadas, setCamadas] = useState([]);
     const [cercas, setcercas] = useState([]);
 
-    const [cercaSelecionada, setCercaSelecionada] = useState(null);
-    const [modalVisivel, setModalVisivel] = useState(false);
+    const [cercaSelecionada, setCercaSelecionada] = useState(null); //para cercas selecionadas pelo usuário
 
-    const [popUpNovaCamada, setPopUpNovaCamada] = useState(false);
-    const [modalEditarCamadaAberto, setModalEditarCamadaAberto] = useState(false);
+    const [modalVisivel, setModalVisivel] = useState(false); //modal de edição de cerca
+    const [popUpNovaCamada, setPopUpNovaCamada] = useState(false); //popUp de criação de uma camada
+    const [modalEditarCamadaAberto, setModalEditarCamadaAberto] = useState(false); //modal de edição de camada
+    //camada selecionada
     const [camadaSelecionada, setCamadaSelecionada] = useState(null);
+    const [modalMudancas, setModalMudancas] = useState(false); //modal de aplicando mudanças
 
+    //função que resgata os dados do banco de dados
+    //camadas e cercas
     async function resgatarCamadas() {
         try {
 
@@ -37,7 +44,6 @@ export default function Home() {
 
             setCamadas(camadasArray);
 
-
             console.log(resposta.data);
 
             resposta = await api.get('/cercas');
@@ -49,13 +55,14 @@ export default function Home() {
         }
     }
 
+    //para que seja possível atualizar as ceras por dentro de outros componentes
     useEffect(() => {
         const atualizar = () => resgatarCamadas();
         window.addEventListener('atualizarCercas', atualizar);
         return () => window.removeEventListener('atualizarCercas', atualizar);
     }, []);
 
-
+    //resgata camadas ao entrar nessa tela
     useEffect(() => {
         resgatarCamadas();
     }, [])
@@ -71,6 +78,7 @@ export default function Home() {
         return () => window.removeEventListener('abrirModalCerca', handler);
     }, []);
 
+    //para criar uma nova camada
     async function criarNovaCamada() {
         try {
             const nome = document.getElementById('nomeNovaCamada').value;
@@ -86,26 +94,30 @@ export default function Home() {
 
             console.log(dado);
 
+            setModalMudancas(true); //abre o modal de mudanças
+
             await api.post(`/camadas`, dado);
             alert('Camada criada!');
             resgatarCamadas();
             setPopUpNovaCamada(false);
 
+            setModalMudancas(false);
+
         } catch (err) {
             console.log('Erro ao criar nova camada: ', err);
             alert('Erro ao criar a nova camada!');
+            setModalMudancas(false);
         }
     }
 
+    // isso será exibido ao carregar
     if (carregando) {
         return (
-            <div style={{ width: '100%', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
-                <img src={loadingGif} alt="" style={{ width: '50px', marginBottom: '20px' }} />
-                <h2>Carregando dados...</h2>
-            </div>
+            <ModalCarregandoDados></ModalCarregandoDados>
         )
     }
 
+    //uma função simples para abrir o modal de editar camadas
     function abrirModalEditarCamada(camada) {
         setCamadaSelecionada(camada);
         setModalEditarCamadaAberto(true);
@@ -169,6 +181,10 @@ export default function Home() {
                         ></ModalCerca>
                     )}
                 </div>
+
+                {modalMudancas && (
+                    <ModalAplicandoMudancas></ModalAplicandoMudancas>
+                )}
 
             </main>
             <MenuSuperior></MenuSuperior>
