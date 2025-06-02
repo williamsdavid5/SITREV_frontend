@@ -1,8 +1,0 @@
-.novaCamadaJanela {
-    background-color: var(--fundo);
-    padding: 20px;
-    position: absolute;
-    top: 60px;
-    left: 26%;
-    z-index: 3000;
-}

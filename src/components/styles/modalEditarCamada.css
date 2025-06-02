@@ -1,0 +1,62 @@
+.editarCamada {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    background-color: var(--auxiliar2);
+    padding: 10px 0px;
+    margin: 10px;
+    border-radius: 10px;
+}
+
+.editarCamada input {
+    background-color: white;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    padding: 4px;
+    width: 80%;
+    border-radius: 8px;
+    margin: 8px 0px;
+}
+
+.editarCamada button {
+    width: 85%;
+    padding: 4px;
+    border-radius: 8px;
+    border: none;
+}
+
+.editarCamada button:hover {
+    transform: scale(1.02);
+}
+
+.botoesEditarCamada {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    width: 100%;
+    padding: 5px;
+}
+
+.botoesEditarCamada button {
+    width: 40%;
+}
+
+#botaoExcluirCamada {
+    background-color: red;
+    color: white;
+}
+
+#botaoSalvarEditarCamada {
+    background-color: black;
+    color: white;
+}
+
+.erroCercasAssociadasCamada {
+    width: 90%;
+    text-align: center;
+    font-size: 13px;
+    margin-bottom: 10px;
+    color: red;
+    font-weight: 600;
+}

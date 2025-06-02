@@ -50,3 +50,18 @@
     color: var(--fundo);
     border-radius: 5px;
 }
+
+.botaoEditarIcon {
+    width: 15px;
+}
+
+.botaoEditarCamada {
+    background-color: rgba(0, 0, 0, 0.0);
+    border: none;
+    margin-left: 5px;
+}
+
+.botaoEditarCamada:hover {
+    cursor: pointer;
+    transform: scale(1.2);
+}

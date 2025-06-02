@@ -7,6 +7,7 @@ import MenuSuperior from "../components/MenuSuperior";
 import Camada from "../components/Camada";
 import Mapa from "../components/Mapa";
 import ModalCerca from "../components/ModalCerca";
+import ModalEditarCamada from "../components/ModalEditarCamada";
 
 import loadingGif from '../assets/loadingGif.gif'
 
@@ -20,6 +21,8 @@ export default function Home() {
     const [modalVisivel, setModalVisivel] = useState(false);
 
     const [popUpNovaCamada, setPopUpNovaCamada] = useState(false);
+    const [modalEditarCamadaAberto, setModalEditarCamadaAberto] = useState(false);
+    const [camadaSelecionada, setCamadaSelecionada] = useState(null);
 
     async function resgatarCamadas() {
         try {
@@ -103,6 +106,12 @@ export default function Home() {
         )
     }
 
+    function abrirModalEditarCamada(camada) {
+        setCamadaSelecionada(camada);
+        setModalEditarCamadaAberto(true);
+    }
+
+
     return (
         <>
             <main id="mainHome">
@@ -110,7 +119,8 @@ export default function Home() {
                     <div className="divTituloCamadas">
                         <h2>Camadas</h2>
                         <button className="botaoNovaCamada" onClick={() => {
-                            setPopUpNovaCamada(true)
+                            setPopUpNovaCamada(true);
+                            setModalEditarCamadaAberto(false);
                         }}>Nova</button>
                     </div>
                     {popUpNovaCamada && (
@@ -125,15 +135,25 @@ export default function Home() {
                             }}>Cancelar</button>
                         </div>
                     )}
+
+                    {modalEditarCamadaAberto && (
+                        <ModalEditarCamada
+                            camada={camadaSelecionada}
+                            onClose={() => setModalEditarCamadaAberto(false)}
+                            onAtualizar={resgatarCamadas}
+                        />
+                    )}
+
                     {(Array.isArray(camadas) ? camadas : []).map((camada) => (
                         <Camada
                             key={camada?.id || Math.random()}
                             nome={camada?.nome || ''}
                             cercas={camada?.cercas || []}
+                            camada={camada}
                             selecionarcerca={setCercaSelecionada}
+                            onEditar={abrirModalEditarCamada}
                         />
                     ))}
-
 
                 </div>
                 <div className="content">
