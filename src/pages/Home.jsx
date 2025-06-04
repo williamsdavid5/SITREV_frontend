@@ -44,8 +44,6 @@ export default function Home() {
 
             setCamadas(camadasArray);
 
-            console.log(resposta.data);
-
             resposta = await api.get('/cercas');
             setcercas(resposta.data);
 
@@ -91,8 +89,6 @@ export default function Home() {
             const dado = {
                 nome
             }
-
-            console.log(dado);
 
             setModalMudancas(true); //abre o modal de mudanças
 

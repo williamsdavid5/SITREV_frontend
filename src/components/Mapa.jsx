@@ -1,15 +1,25 @@
 import { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, useMap } from 'react-leaflet';
+import { MapContainer, Marker, Popup, TileLayer, useMap, Polyline } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import { useRef } from 'react';
 import api from '../server/api';
-import './styles/mapa.css'
+import './styles/mapa.css';
+import veiculoIcon from '../assets/veiculoIcon.png';
 
 import ModalCerca from './ModalCerca';
 
+//icon personalizado do veiculo
+const vehicleIcon = new L.Icon({
+    iconUrl: veiculoIcon,
+    iconSize: [40, 40],
+    iconAnchor: [15, 15],
+    className: 'iconeVeiculo'
+});
+
+// essa função é responsável por configurar os controles padrões do leaflet, dar funções a eles
 function ControladorDesenho({
     cercas,
     cercaSelecionada,
@@ -19,6 +29,8 @@ function ControladorDesenho({
     setCercaSelecionada
 }) {
     const map = useMap();
+    const [pontosMarcados, setPontosMarcados] = useState([]);
+
 
     useEffect(() => {
         if (map._drawControlAdded) return;
@@ -32,7 +44,8 @@ function ControladorDesenho({
                 polyline: false,
                 rectangle: false,
                 circle: false,
-                marker: false
+                marker: true,
+                circlemarker: false,
             },
             edit: {
                 featureGroup: drawnItems
@@ -46,11 +59,22 @@ function ControladorDesenho({
 
         map.on(L.Draw.Event.CREATED, function (event) {
             const layer = event.layer;
-            const latlngs = layer.getLatLngs()[0];
-            const coordenadas = latlngs.map(coord => [coord.lat, coord.lng]);
-            setNovaCercaCoordenadas(coordenadas);
-            setModalVisivel(true);
+
+            if (event.layerType === 'polygon') {
+                const latlngs = layer.getLatLngs()[0];
+                const coordenadas = latlngs.map(coord => [coord.lat, coord.lng]);
+                setNovaCercaCoordenadas(coordenadas);
+                setModalVisivel(true);
+            }
+
+            if (event.layerType === 'marker') {
+                const { lat, lng } = layer.getLatLng();
+                setPontosMarcados(prev => [...prev, [lat, lng]]);
+                drawnItems.addLayer(layer);
+                console.log(pontosMarcados);
+            }
         });
+
 
         map.on(L.Draw.Event.EDITED, async function (event) {
             const layers = event.layers;
@@ -121,8 +145,12 @@ function ControladorDesenho({
         };
     }, [cercas]);
 
+    useEffect(() => {
+        console.log('Pontos marcados atualizados:', pontosMarcados);
+    }, [pontosMarcados]);
 
-    // 🔁 Atualiza o mapa sempre que 'cercas' mudar
+
+    // Atualiza o mapa sempre que 'cercas' mudar
     useEffect(() => {
         const drawnItems = map._drawnItems;
         if (!drawnItems) return;
@@ -169,6 +197,8 @@ export default function Mapa({ cercas, cercaSelecionada, setCercaSelecionada }) 
     const [modalVisivel, setModalVisivel] = useState(false);
     const [novaCercaCoordenadas, setNovaCercaCoordenadas] = useState(null);
     const [camadas, setCamadas] = useState(false);
+    const [viagens, setViagens] = useState(null);
+    const [viagemSelecionada, setVIagemSelecionada] = useState(null);
 
     const [currentProvider, setCurrentProvider] = useState('stadia');
     const mapProviders = {
@@ -228,7 +258,20 @@ export default function Mapa({ cercas, cercaSelecionada, setCercaSelecionada }) 
             }
         }
 
+        async function resgatarViagens() {
+            try {
+
+                let resposta = await api.get('/viagens/registros');
+                setViagens(resposta.data);
+
+            } catch (err) {
+                console.log('erro ao resgatar viagens: ', err);
+                alert('Erro ao resgatar viagens');
+            }
+        }
+
         resgatarCamadas();
+        resgatarViagens();
     }, [])
 
     return (
@@ -249,6 +292,48 @@ export default function Mapa({ cercas, cercaSelecionada, setCercaSelecionada }) 
                     layerRefs={layerRefs}
                     setNovaCercaCoordenadas={setNovaCercaCoordenadas}
                 />
+
+                {viagens && Array.isArray(viagens) ? viagens.map((viagem) => {
+                    if (!viagem.registros || viagem.registros.length === 0) return null;
+
+                    const ultimoPonto = viagem.registros[viagem.registros.length - 1];
+                    const position = [parseFloat(ultimoPonto.latitude), parseFloat(ultimoPonto.longitude)];
+
+                    if (!position[0] || !position[1]) return null; // segurança extra
+
+                    return (
+                        <Marker
+                            key={viagem.id}
+                            position={position}
+                            icon={vehicleIcon}
+                            eventHandlers={{
+                                click: () => {
+                                    setVIagemSelecionada(viagem.id === viagemSelecionada ? null : viagem.id);
+                                }
+                            }}
+                        >
+                            <Popup>
+                                <div>
+                                    <b>Viagem ID: {viagem.id}</b><br />
+                                    Motorista ID: {viagem.motorista_id}<br />
+                                    Velocidade atual: {ultimoPonto.velocidade} km/h
+                                </div>
+                            </Popup>
+                        </Marker>
+                    )
+                }) : <></>}
+
+
+                {viagemSelecionada && (() => {
+                    const viagem = viagens.find(v => v.id === viagemSelecionada);
+                    if (!viagem) return null;
+
+                    const pontos = viagem.registros.map(p => [parseFloat(p.latitude), parseFloat(p.longitude)]);
+
+                    return (
+                        <Polyline positions={pontos} color="blue" />
+                    );
+                })()}
             </MapContainer>
 
             {modalVisivel && (
