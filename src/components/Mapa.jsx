@@ -171,7 +171,7 @@ function ControladorDesenho({
         <b>${cerca.nome}</b><br>
         Máx: ${cerca.velocidade_max} km/h<br>
         Chuva: ${cerca.velocidade_chuva} km/h<br>
-        <button class='botaoEditarCerca' data-id='${cerca.id}'>Editar</button>
+        <button class='botaoPopUpMapa' data-id='${cerca.id}'>Editar</button>
       `);
 
             drawnItems.addLayer(poligono);
@@ -263,6 +263,7 @@ export default function Mapa({ cercas, cercaSelecionada, setCercaSelecionada }) 
 
                 let resposta = await api.get('/viagens/registros');
                 setViagens(resposta.data);
+                console.log(resposta.data)
 
             } catch (err) {
                 console.log('erro ao resgatar viagens: ', err);
@@ -297,6 +298,24 @@ export default function Mapa({ cercas, cercaSelecionada, setCercaSelecionada }) 
                     if (!viagem.registros || viagem.registros.length === 0) return null;
 
                     const ultimoPonto = viagem.registros[viagem.registros.length - 1];
+
+                    const dataObj = new Date(ultimoPonto.timestamp);
+                    const opcoesData = {
+                        timeZone: "America/Sao_Paulo",
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                    };
+                    const opcoesHora = {
+                        timeZone: "America/Sao_Paulo",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                    };
+
+                    const dataFormatada = dataObj.toLocaleDateString("pt-BR", opcoesData);
+                    const horaFormatada = dataObj.toLocaleTimeString("pt-BR", opcoesHora);
+
+                    const ultimoHorario = `${horaFormatada}, ${dataFormatada}`;
                     const position = [parseFloat(ultimoPonto.latitude), parseFloat(ultimoPonto.longitude)];
 
                     if (!position[0] || !position[1]) return null; // segurança extra
@@ -314,9 +333,11 @@ export default function Mapa({ cercas, cercaSelecionada, setCercaSelecionada }) 
                         >
                             <Popup>
                                 <div>
-                                    <b>Viagem ID: {viagem.id}</b><br />
-                                    Motorista ID: {viagem.motorista_id}<br />
-                                    Velocidade atual: {ultimoPonto.velocidade} km/h
+                                    <b>Veículo: {viagem.veiculo_identificador}</b><br />
+                                    <b>Motorista:</b> {viagem.nome_motorista}<br />
+                                    Ultima leitura às <b>{ultimoHorario}</b><br />
+                                    {/* Velocidade: {ultimoPonto.velocidade} km/h <br /> */}
+                                    <button className='botaoPopUpMapa' >Ver mais</button>
                                 </div>
                             </Popup>
                         </Marker>

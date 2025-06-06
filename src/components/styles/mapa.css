@@ -4,7 +4,7 @@
     height: 100%;
 }
 
-.botaoEditarCerca {
+.botaoPopUpMapa {
     background-color: var(--destaque2);
     border: none;
     border-radius: 20px;
