@@ -126,6 +126,7 @@ function ControladorDesenho({
         });
     }, [map]);
 
+    //para detectar o click na edição de uma cerca
     useEffect(() => {
         function handleClick(event) {
             const botao = event.target.closest('.botaoEditarCerca');
@@ -145,6 +146,7 @@ function ControladorDesenho({
         };
     }, [cercas]);
 
+    //para armazenar os pontos (apenas para criar dados falsos...)
     useEffect(() => {
         console.log('Pontos marcados atualizados:', pontosMarcados);
     }, [pontosMarcados]);
@@ -171,13 +173,15 @@ function ControladorDesenho({
         <b>${cerca.nome}</b><br>
         Máx: ${cerca.velocidade_max} km/h<br>
         Chuva: ${cerca.velocidade_chuva} km/h<br>
-        <button class='botaoPopUpMapa' data-id='${cerca.id}'>Editar</button>
+        <button class='botaoEditarCerca botaoPopUpMapa' data-id='${cerca.id}'>Editar</button>
+
       `);
 
             drawnItems.addLayer(poligono);
         });
     }, [cercas, map]);
 
+    //para centralizar a cerca selecionada no menu lateral
     useEffect(() => {
         if (cercaSelecionada && layerRefs.current[cercaSelecionada.id]) {
             const layer = layerRefs.current[cercaSelecionada.id];
@@ -189,7 +193,6 @@ function ControladorDesenho({
     return null;
 };
 
-// export default ControladorDesenho;
 
 export default function Mapa({ cercas, cercaSelecionada, setCercaSelecionada }) {
 
@@ -240,7 +243,9 @@ export default function Mapa({ cercas, cercaSelecionada, setCercaSelecionada }) 
         }
     };
 
+    //resgata os dados
     useEffect(() => {
+        // camadas e cercas
         async function resgatarCamadas() {
             try {
 
@@ -258,18 +263,18 @@ export default function Mapa({ cercas, cercaSelecionada, setCercaSelecionada }) 
             }
         }
 
+        // viagens
         async function resgatarViagens() {
             try {
-
-                let resposta = await api.get('/viagens/registros');
+                let resposta = await api.get('/veiculos/registros');
                 setViagens(resposta.data);
-                console.log(resposta.data)
-
+                console.log(resposta.data);
             } catch (err) {
-                console.log('erro ao resgatar viagens: ', err);
+                console.log('erro ao resgatar registros dos veículos:', err);
                 alert('Erro ao resgatar viagens');
             }
         }
+
 
         resgatarCamadas();
         resgatarViagens();
@@ -294,35 +299,32 @@ export default function Mapa({ cercas, cercaSelecionada, setCercaSelecionada }) 
                     setNovaCercaCoordenadas={setNovaCercaCoordenadas}
                 />
 
-                {viagens && Array.isArray(viagens) ? viagens.map((viagem) => {
-                    if (!viagem.registros || viagem.registros.length === 0) return null;
+                {viagens && Array.isArray(viagens) ? viagens.map((veiculo) => {
+                    const viagem = veiculo.viagem;
+                    if (!viagem || !viagem.registros || viagem.registros.length === 0) return null;
 
                     const ultimoPonto = viagem.registros[viagem.registros.length - 1];
 
                     const dataObj = new Date(ultimoPonto.timestamp);
-                    const opcoesData = {
+                    const dataFormatada = dataObj.toLocaleDateString("pt-BR", {
                         timeZone: "America/Sao_Paulo",
                         day: "2-digit",
                         month: "2-digit",
                         year: "numeric",
-                    };
-                    const opcoesHora = {
+                    });
+                    const horaFormatada = dataObj.toLocaleTimeString("pt-BR", {
                         timeZone: "America/Sao_Paulo",
                         hour: "2-digit",
                         minute: "2-digit",
-                    };
-
-                    const dataFormatada = dataObj.toLocaleDateString("pt-BR", opcoesData);
-                    const horaFormatada = dataObj.toLocaleTimeString("pt-BR", opcoesHora);
-
+                    });
                     const ultimoHorario = `${horaFormatada}, ${dataFormatada}`;
                     const position = [parseFloat(ultimoPonto.latitude), parseFloat(ultimoPonto.longitude)];
 
-                    if (!position[0] || !position[1]) return null; // segurança extra
+                    if (!position[0] || !position[1]) return null;
 
                     return (
                         <Marker
-                            key={viagem.id}
+                            key={veiculo.id}
                             position={position}
                             icon={vehicleIcon}
                             eventHandlers={{
@@ -333,28 +335,29 @@ export default function Mapa({ cercas, cercaSelecionada, setCercaSelecionada }) 
                         >
                             <Popup>
                                 <div>
-                                    <b>Veículo: {viagem.veiculo_identificador}</b><br />
-                                    <b>Motorista:</b> {viagem.nome_motorista}<br />
-                                    Ultima leitura às <b>{ultimoHorario}</b><br />
-                                    {/* Velocidade: {ultimoPonto.velocidade} km/h <br /> */}
-                                    <button className='botaoPopUpMapa' >Ver mais</button>
+                                    <b>Veículo: {veiculo.identificador}</b><br />
+                                    <b>Motorista:</b> {viagem.motorista.nome}<br />
+                                    Última leitura às <b>{ultimoHorario}</b><br />
+                                    <button className='botaoPopUpMapa'>Ver mais</button>
                                 </div>
                             </Popup>
                         </Marker>
-                    )
-                }) : <></>}
-
+                    );
+                }) : null}
 
                 {viagemSelecionada && (() => {
-                    const viagem = viagens.find(v => v.id === viagemSelecionada);
-                    if (!viagem) return null;
+                    const veiculoComViagem = viagens.find(v => v.viagem.id === viagemSelecionada);
+                    if (!veiculoComViagem) return null;
 
-                    const pontos = viagem.registros.map(p => [parseFloat(p.latitude), parseFloat(p.longitude)]);
+                    const pontos = veiculoComViagem.viagem.registros.map(p =>
+                        [parseFloat(p.latitude), parseFloat(p.longitude)]
+                    );
 
                     return (
                         <Polyline positions={pontos} color="blue" />
                     );
                 })()}
+
             </MapContainer>
 
             {modalVisivel && (

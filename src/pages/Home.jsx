@@ -11,8 +11,6 @@ import ModalEditarCamada from "../components/ModalEditarCamada";
 import ModalAplicandoMudancas from "../components/ModalAplicandoMudancas";
 import ModalCarregandoDados from "../components/ModalCarregandoDados";
 
-import loadingGif from '../assets/loadingGif.gif'
-
 export default function Home() {
 
     const [carregando, setCarregando] = useState(true); //para mostrar o loading

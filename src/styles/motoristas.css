@@ -1,0 +1,33 @@
+.contentMotoristas {
+    padding-top: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    background-color: var(--fundo);
+}
+
+.esquerdaMotoristas {
+    width: 30%;
+    height: calc(100vh - 45px);
+    box-sizing: border-box;
+    padding: 5px 15px;
+}
+
+.direitaMotoristas {
+    width: 70%;
+    height: calc(100vh - 45px);
+    box-sizing: border-box;
+    background-color: var(--destaque1);
+}
+
+#inputPesquisarMotorista {
+    background-color: black;
+    color: white;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    margin: 10px 0px;
+    width: 100%;
+    box-sizing: border-box;
+}
