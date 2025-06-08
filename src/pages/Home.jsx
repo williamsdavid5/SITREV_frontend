@@ -123,7 +123,7 @@ export default function Home() {
             <main id="mainHome">
                 <div className="janelaLateralPequena">
                     <div className="divTituloCamadas">
-                        <h2>Camadas</h2>
+                        <h2>Cercas</h2>
                         <button className="botaoNovaCamada" onClick={() => {
                             setPopUpNovaCamada(true);
                             setModalEditarCamadaAberto(false);

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 
 import ModalCarregandoDados from "../components/ModalCarregandoDados.jsx";
 import MotoristaitemLista from "../components/MotoristaitemLista.jsx";
+import MapaPercurso from "../components/MapaPercurso.jsx";
 
 export default function Motoristas() {
 
@@ -59,7 +60,7 @@ export default function Motoristas() {
                     </div>
 
                     <div className="direitaMotoristas">
-                        <p>direita</p>
+                        <MapaPercurso></MapaPercurso>
                     </div>
                 </div>
 
