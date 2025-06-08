@@ -1,0 +1,15 @@
+.motoristaItemLista {
+    /* background-color: var(--auxiliar2); */
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    /* margin-bottom: 10px; */
+    /* margin-top: 10px; */
+    padding: 5px;
+    width: 95%;
+    cursor: pointer;
+}
+
+.motoristaItemLista:hover {
+    background-color: white;
+    /* transition: background-color 0.4s; */
+}
