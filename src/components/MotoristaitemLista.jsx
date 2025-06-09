@@ -1,6 +1,6 @@
 import './styles/motoristasItemLista.css'
 
-export default function MotoristaitemLista({ motorista }) {
+export default function MotoristaitemLista({ motorista, selecionado, aoSelecionar }) {
     const horario = motorista.ultimaLeitura?.horario;
 
     function formatarDataHora(leitura) {
@@ -15,7 +15,7 @@ export default function MotoristaitemLista({ motorista }) {
 
 
     return (
-        <div className="motoristaItemLista">
+        <div className={`motoristaItemLista ${selecionado ? 'motoristaSelecionadoLista' : ''}`} onClick={aoSelecionar}>
             <p><b>{motorista.nome}</b></p>
             <div className="motoristaItemListaInformacoes">
                 <p>Status atual: {motorista.status}</p>

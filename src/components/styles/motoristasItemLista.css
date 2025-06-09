@@ -11,5 +11,11 @@
 
 .motoristaItemLista:hover {
     background-color: white;
+    color: var(--destaque2);
     /* transition: background-color 0.4s; */
+}
+
+.motoristaSelecionadoLista {
+    color: var(--fundo);
+    background-color: var(--destaque2);
 }

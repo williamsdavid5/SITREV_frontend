@@ -13,6 +13,9 @@ export default function Motoristas() {
     const [motoristas, setMotoristas] = useState();
     const [pesquisa, setPesquisa] = useState('');
 
+    //para a logica de seleção compartilhada entre mapa e lista
+    const [motoristaSelecionado, setMotoristaSelecionado] = useState(null);
+
     const motoristasFiltrados = motoristas?.filter(motorista => motorista.nome.toLowerCase().includes(pesquisa.toLowerCase()));
 
     async function resgatarMotoristas() {
@@ -54,13 +57,21 @@ export default function Motoristas() {
                         </div>
                         <div className="containerRolavelLista">
                             {motoristasFiltrados.map(motorista => (
-                                <MotoristaitemLista motorista={motorista} key={motorista.id}></MotoristaitemLista>
+                                <MotoristaitemLista
+                                    motorista={motorista}
+                                    key={motorista.id}
+                                    selecionado={motoristaSelecionado === motorista.id}
+                                    aoSelecionar={() => setMotoristaSelecionado(motorista.id)}
+                                ></MotoristaitemLista>
                             ))}
                         </div>
                     </div>
 
                     <div className="direitaMotoristas">
-                        <MapaPercurso></MapaPercurso>
+                        <MapaPercurso
+                            motoristaSelecionado={motoristaSelecionado}
+                            setMotoristaSelecionado={setMotoristaSelecionado}
+                        ></MapaPercurso>
                     </div>
                 </div>
 
