@@ -6,12 +6,15 @@ import { useEffect, useState } from "react";
 import ModalCarregandoDados from "../components/ModalCarregandoDados.jsx";
 import MotoristaitemLista from "../components/MotoristaitemLista.jsx";
 import MapaPercurso from "../components/MapaPercurso.jsx";
+import MotoristaIndividualPage from "../components/MotoristaIndividualPage.jsx";
 
 export default function Motoristas() {
 
     const [carregando, setCarregando] = useState(true);
     const [motoristas, setMotoristas] = useState();
     const [pesquisa, setPesquisa] = useState('');
+    const [paginaMotoristaInidividual, setPaginaMotoristaInidividual] = useState(false);
+
 
     //para a logica de seleção compartilhada entre mapa e lista
     const [motoristaSelecionado, setMotoristaSelecionado] = useState(null);
@@ -29,6 +32,12 @@ export default function Motoristas() {
             alert('Erro ao resgatar motoristas!');
             setCarregando(false);
         }
+    }
+
+    const [motoristaVerMaisId, setMotoristaVerMaisId] = useState();
+    function mostrarPaginaMotoristaIndividual(id) {
+        setMotoristaVerMaisId(id);
+        setPaginaMotoristaInidividual(true);
     }
 
     useEffect(() => {
@@ -62,6 +71,7 @@ export default function Motoristas() {
                                     key={motorista.id}
                                     selecionado={motoristaSelecionado === motorista.id}
                                     aoSelecionar={() => setMotoristaSelecionado(motorista.id)}
+                                    mostrarPaginaMotoristaIndividual={mostrarPaginaMotoristaIndividual}
                                 ></MotoristaitemLista>
                             ))}
                         </div>
@@ -75,8 +85,11 @@ export default function Motoristas() {
                     </div>
                 </div>
 
-                <MenuSuperior></MenuSuperior>
+                {paginaMotoristaInidividual && (
+                    <MotoristaIndividualPage motoristaId={motoristaVerMaisId} setPaginaMotoristaInidividual={setPaginaMotoristaInidividual}></MotoristaIndividualPage>
+                )}
 
+                <MenuSuperior></MenuSuperior>
             </>
         )
     }

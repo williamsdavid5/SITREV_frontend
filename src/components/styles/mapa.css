@@ -75,7 +75,7 @@
 
 #providerSelect {
     position: absolute;
-    z-index: 2000;
+    z-index: 1000;
     right: 20px;
     top: 60px;
     /* border: 2px solid var(--fundo); */

@@ -1,7 +1,6 @@
 import loadingGif from '../assets/loadingGif.gif'
 import './styles/modalCarregandoDados.css'
-import MenuSuperior
-    from './MenuSuperior'
+import MenuSuperior from './MenuSuperior'
 export default function ModalCarregandoDados() {
     return (
         <>
