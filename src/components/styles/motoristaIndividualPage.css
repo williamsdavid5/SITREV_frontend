@@ -11,14 +11,15 @@
 }
 
 #motoristaIndividualPageEsquerda {
-    width: 50%;
+    width: 30%;
     height: calc(100vh - 45px);
     padding: 10px;
     box-sizing: border-box;
+    overflow-y: auto;
 }
 
 #motoristaIndividualPageDireita {
-    width: 50%;
+    width: 70%;
     height: calc(100vh - 45px);
     background-color: var(--destaque1);
 }
@@ -53,4 +54,36 @@
     width: 100%;
     display: flex;
     justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.divViagensMotorista {
+    width: 100%;
+    background-color: white;
+    border-radius: 5px;
+    box-sizing: border-box;
+    margin: 10px 0px;
+    max-height: 35vh;
+    overflow-y: auto;
+}
+
+.viagemMotoristaItemLista {
+    border-top: 1px solid rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    cursor: pointer;
+}
+
+.viagemMotoristaItemLista:hover {
+    background-color: var(--destaque1);
+    color: white;
+}
+
+.botaoMostrarTodosOsAlertas {
+    background-color: var(--destaque2);
+    color: var(--fundo);
+    border: none;
+    width: 100%;
+    padding: 5px;
+    border-radius: 8px;
+    cursor: pointer;
 }
