@@ -39,6 +39,7 @@ export default function MapaMotoristaIndividual({ motorista, viagemSelecionada, 
     const [posicaoAtual, setPosicaoAtual] = useState([-3.76, -49.67]);
     const [pontos, setPontos] = useState([]);
 
+    //para encontrar a ultima posição do motorista
     useEffect(() => {
         if (motorista?.viagens?.length > 0) {
             const ultimaViagem = motorista.viagens[motorista.viagens.length - 1];
@@ -53,6 +54,7 @@ export default function MapaMotoristaIndividual({ motorista, viagemSelecionada, 
         }
     }, [motorista]);
 
+    //para detectar seleção de viagem
     useEffect(() => {
         if (viagemSelecionada?.registros?.length > 0) {
             const ultimo = viagemSelecionada.registros.at(-1);
@@ -69,12 +71,18 @@ export default function MapaMotoristaIndividual({ motorista, viagemSelecionada, 
         }
     }, [viagemSelecionada]);
 
+    //para mostrar todos os alertas
     useEffect(() => {
-        if (!mostrarTodos && alertaSelecionado?.registroCoordenadas?.length > 0) {
+        if (
+            !mostrarTodos &&
+            !viagemSelecionada &&
+            alertaSelecionado?.registroCoordenadas?.length > 0
+        ) {
             const primeira = alertaSelecionado.registroCoordenadas[0];
             setPosicaoAtual([parseFloat(primeira.latitude), parseFloat(primeira.longitude)]);
         }
-    }, [alertaSelecionado, mostrarTodos]);
+    }, [alertaSelecionado, mostrarTodos, viagemSelecionada]);
+
 
     return (
         <div className='mapaPercurso'>
