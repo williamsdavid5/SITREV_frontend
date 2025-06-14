@@ -3,6 +3,7 @@ import Home from './pages/Home';
 import Motoristas from './pages/Motoristas'
 import Alertas from './pages/Alertas';
 import Veiculos from './pages/Veículos';
+import Registros from './pages/Registros';
 import './styles/global.css'
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
           <Route path='/motoristas' element={<Motoristas />} />
           <Route path='/veiculos' element={<Veiculos />} />
           <Route path='/alertas' element={<Alertas />} />
+          <Route path='/registros' element={<Registros />} />
         </Routes>
       </BrowserRouter>
     </>

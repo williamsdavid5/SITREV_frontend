@@ -1,0 +1,77 @@
+.registrosPage {
+    height: calc(100vh - 45px);
+    padding-top: 45px;
+    display: flex;
+    width: 100%;
+}
+
+.esquerdaRegistros {
+    width: 35%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.direitaRegistros {
+    width: 65%;
+    background-color: var(--destaque1);
+    box-sizing: border-box;
+}
+
+.topoRegistros {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.pesquisaPorData {
+    display: flex;
+    width: 100%;
+    gap: 5px;
+    box-sizing: border-box;
+}
+
+.pesquisaPorDataInputs {
+    display: flex;
+    gap: 5px;
+}
+
+.inputdata {
+    flex: 1;
+    box-sizing: border-box;
+    width: 40%;
+}
+
+.registrosPage input {
+    background-color: var(--destaque2);
+    border: none;
+    color: var(--fundo);
+    border-radius: 8px;
+    padding: 5px;
+    margin: 5px 0px;
+}
+
+.inputPesquisaQualquerCoisa {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.divRegistros {
+    background-color: white;
+    width: 100%;
+    border-radius: 15px;
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.registroItemLista {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    overflow-y: auto;
+    cursor: pointer;
+}
+
+.registroItemLista:hover {
+    background-color: var(--destaque1);
+    color: var(--fundo);
+}

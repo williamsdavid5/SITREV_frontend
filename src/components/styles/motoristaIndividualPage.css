@@ -16,6 +16,9 @@
     padding: 10px;
     box-sizing: border-box;
     overflow-y: auto;
+
+    display: flex;
+    flex-direction: column;
 }
 
 #motoristaIndividualPageDireita {
@@ -55,7 +58,14 @@
     width: 100%;
     display: flex;
     justify-content: space-between;
-    margin-bottom: 15px;
+    margin-bottom: 5px;
+}
+
+.motoristaDemaisInformações {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    overflow-y: hidden;
 }
 
 .divViagensMotorista {
@@ -64,12 +74,13 @@
     border-radius: 5px;
     box-sizing: border-box;
     margin: 10px 0px;
-    max-height: 30vh;
+    /* max-height: 25vh; */
+    flex: 1;
     overflow-y: auto;
 }
 
 .viagemMotoristaItemLista {
-    border-top: 1px solid rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
     padding: 10px;
     cursor: pointer;
 }

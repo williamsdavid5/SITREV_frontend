@@ -69,8 +69,9 @@ export default function MotoristaIndividualPage({ motoristaId, setPaginaMotorist
         return (
             <div className='paginaMotoristaIndividual'>
                 <div id='motoristaIndividualPageEsquerda'>
+                    <p>Aqui estão todos os registros relacionados ao motorista</p>
                     <div className='topoMotoristaIndividual'>
-                        <h1>{motorista.nome}</h1>
+                        <h2>{motorista.nome}</h2>
                         <button className='botaoFechar' onClick={() => setPaginaMotoristaInidividual(false)}>
                             <img className='botaofecharImg' src={fecharIcon} alt="" />
                         </button>
