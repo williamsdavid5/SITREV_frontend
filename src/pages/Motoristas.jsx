@@ -25,7 +25,6 @@ export default function Motoristas() {
         try {
             let motoristasDados = await api.get('/motoristas/limpo');
             setMotoristas(motoristasDados.data)
-            console.log(motoristasDados.data);
             setCarregando(false);
         } catch (err) {
             console.log('erro ao resgatar motoristas, ', err);

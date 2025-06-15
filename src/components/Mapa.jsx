@@ -45,7 +45,7 @@ function ControladorDesenho({
                 polyline: false,
                 rectangle: false,
                 circle: false,
-                marker: true,
+                marker: false, //mudar caso queira marcar pontos e resgatar cooredenadas
                 circlemarker: false,
             },
             edit: {
@@ -231,7 +231,6 @@ export default function Mapa({ cercas, cercaSelecionada, setCercaSelecionada }) 
             try {
                 let resposta = await api.get('/veiculos/registros');
                 setViagens(resposta.data);
-                console.log(resposta.data);
             } catch (err) {
                 console.log('erro ao resgatar registros dos veículos:', err);
                 alert('Erro ao resgatar viagens');

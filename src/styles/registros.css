@@ -16,6 +16,7 @@
     width: 65%;
     background-color: var(--destaque1);
     box-sizing: border-box;
+    overflow-y: hidden;
 }
 
 .topoRegistros {
@@ -74,4 +75,26 @@
 .registroItemLista:hover {
     background-color: var(--destaque1);
     color: var(--fundo);
+}
+
+.carregandoPercursoDiv {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    color: white;
+    align-items: center;
+    justify-content: center;
+    top: 0;
+    right: 0;
+
+    backdrop-filter: blur(3px);
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+.carregandoPercursoDiv img {
+    width: 80px;
+    object-fit: contain;
 }

@@ -47,8 +47,6 @@ export default function MapaPercurso({ motoristaSelecionado, setMotoristaSelecio
     async function resgatarVeiculosRegistro() {
         try {
             const resposta = await api.get('/veiculos/registros');
-            console.log('viagens:')
-            console.log(resposta.data);
             setViagens(resposta.data);
         } catch (err) {
             console.log('Erro ao resgatar viagens: ', err);

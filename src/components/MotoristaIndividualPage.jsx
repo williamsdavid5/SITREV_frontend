@@ -30,7 +30,6 @@ export default function MotoristaIndividualPage({ motoristaId, setPaginaMotorist
         try {
             let resposta = await api.get(`motoristas/${motoristaId}`);
             setMotorista(resposta.data);
-            console.log(resposta.data);
             setCarregando(false);
         } catch (err) {
             console.log('erro ao resgatar motorista individual ', err);
