@@ -10,6 +10,7 @@ import './styles/mapa.css';
 import veiculoIcon from '../assets/veiculoIcon.png';
 import veiculoIconSelecionado from '../assets/veiculoIconSelecionado.png'
 import mapProviders from '../utils/mapProviders';
+import loadingGif from '../assets/loadingGif.gif'
 
 //icon personalizado do veiculo
 const vehicleIcon = new L.Icon({
@@ -26,20 +27,31 @@ const vehicleIconSelecionado = new L.Icon({
     className: 'iconeVeiculo'
 });
 
-export default function MapaPercurso({ motoristaSelecionado, setMotoristaSelecionado }) {
+export default function MapaPercurso({
+    motoristaSelecionado,
+    setMotoristaSelecionado,
+    mostrarPaginaMotoristaIndividual,
+    centralizarProximoMotorista
+}) {
     const [currentProvider, setCurrentProvider] = useState('stadia');
     const [cercas, setCercas] = useState([]);
     const [viagens, setViagens] = useState([]);
     const [viagemSelecionada, setVIagemSelecionada] = useState(null);
+    const [carregando, setCarregando] = useState(false);
+
+    // const centralizarProximoMotorista = useRef(true); //para a logica de centralização, impede que o mapa centralize o percurso ao selecionar no mapa em vez da lista
 
     // para resgatar cercas obviamente
     async function resgatarCercas() {
         try {
+            setCarregando(true);
             const cercas = await api.get('/cercas');
             setCercas(cercas.data);
+            setCarregando(false);
         } catch (err) {
             console.log(err);
             alert('Erro ao resgatar ou desenhar cercas');
+            setCarregando(false);
         }
     }
 
@@ -59,15 +71,20 @@ export default function MapaPercurso({ motoristaSelecionado, setMotoristaSelecio
         const map = useMap();
 
         useEffect(() => {
-            if (coordenadas) {
+            if (coordenadas && centralizarProximoMotorista.current) {
                 map.setView(coordenadas, 17);
             }
+            centralizarProximoMotorista.current = true; // sempre reseta para o próximo clique na lista
         }, [coordenadas]);
 
         return null;
     }
 
-    const motoristaSelecionadoObj = viagens.find(v => v.viagem.motorista.id === motoristaSelecionado);
+
+    const motoristaSelecionadoObj = motoristaSelecionado
+        ? viagens.find(v => v.viagem.motorista.id === motoristaSelecionado)
+        : null;
+
     const posicaoMotoristaSelecionado =
         motoristaSelecionadoObj && motoristaSelecionadoObj.viagem.registros.length > 0
             ? [
@@ -92,9 +109,10 @@ export default function MapaPercurso({ motoristaSelecionado, setMotoristaSelecio
                     attribution={mapProviders[currentProvider].attribution}
                 />
 
-                {posicaoMotoristaSelecionado && (
+                {posicaoMotoristaSelecionado && centralizarProximoMotorista.current && (
                     <CentralizarMapa coordenadas={posicaoMotoristaSelecionado} />
                 )}
+
 
                 {cercas.map((cerca) => {
                     const coordenadas = cerca.coordenadas.map(coord => [parseFloat(coord[0]), parseFloat(coord[1])]);
@@ -144,17 +162,25 @@ export default function MapaPercurso({ motoristaSelecionado, setMotoristaSelecio
                             icon={motoristaSelecionado === viagem.motorista.id ? vehicleIconSelecionado : vehicleIcon}
                             eventHandlers={{
                                 click: () => {
+                                    centralizarProximoMotorista.current = false;
                                     setVIagemSelecionada(viagem.id === viagemSelecionada ? null : viagem.id);
                                     setMotoristaSelecionado(viagem.motorista.id);
                                 }
                             }}
+
                         >
                             <Popup>
                                 <div>
                                     <b>Veículo: {veiculo.identificador}</b><br />
                                     <b>Motorista:</b> {viagem.motorista.nome}<br />
                                     Última leitura às <b>{ultimoHorario}</b><br />
-                                    <button className='botaoPopUpMapa'>Ver mais</button>
+                                    <button
+                                        className='botaoPopUpMapa'
+                                        onClick={() => mostrarPaginaMotoristaIndividual(viagem.motorista.id)}
+                                    >
+                                        Ver mais
+                                    </button>
+
                                 </div>
                             </Popup>
                         </Marker>
@@ -189,6 +215,13 @@ export default function MapaPercurso({ motoristaSelecionado, setMotoristaSelecio
                     </option>
                 ))}
             </select>
+
+            {carregando && (
+                <div className='divCarregando'>
+                    <img src={loadingGif} alt="" />
+                    <p> <b>Carregando dados, aguarde...</b> </p>
+                </div>
+            )}
         </div>
     )
 }

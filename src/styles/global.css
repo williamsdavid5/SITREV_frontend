@@ -6,7 +6,7 @@ body {
     padding: 0;
     font-family: 'Open sans';
     background-color: var(--fundo);
-    height: 100vh;
+    /* height: 100vh; */
 }
 
 p,

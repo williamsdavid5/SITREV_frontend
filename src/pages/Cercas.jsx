@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom"
 import api from "../server/api";
 import { useEffect, useState } from "react";
-import '../styles/home.css';
+import '../styles/cercas.css';
 
 import MenuSuperior from "../components/MenuSuperior";
 import Camada from "../components/Camada";
@@ -11,7 +11,7 @@ import ModalEditarCamada from "../components/ModalEditarCamada";
 import ModalAplicandoMudancas from "../components/ModalAplicandoMudancas";
 import ModalCarregandoDados from "../components/ModalCarregandoDados";
 
-export default function Home() {
+export default function Cercas() {
 
     const [carregando, setCarregando] = useState(true); //para mostrar o loading
     //para armazenar os dados do banco de dados

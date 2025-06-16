@@ -1,7 +1,7 @@
 import MenuSuperior from "../components/MenuSuperior"
 import '../styles/motoristas.css'
 import api from '../server/api.js'
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import ModalCarregandoDados from "../components/ModalCarregandoDados.jsx";
 import MotoristaitemLista from "../components/MotoristaitemLista.jsx";
@@ -18,6 +18,8 @@ export default function Motoristas() {
 
     //para a logica de seleção compartilhada entre mapa e lista
     const [motoristaSelecionado, setMotoristaSelecionado] = useState(null);
+
+    const centralizarProximoMotorista = useRef(true);
 
     const motoristasFiltrados = motoristas?.filter(motorista => motorista.nome.toLowerCase().includes(pesquisa.toLowerCase()));
 
@@ -65,13 +67,20 @@ export default function Motoristas() {
                         </div>
                         <div className="containerRolavelLista">
                             {motoristasFiltrados.map(motorista => (
-                                <MotoristaitemLista
-                                    motorista={motorista}
+                                <div
                                     key={motorista.id}
-                                    selecionado={motoristaSelecionado === motorista.id}
-                                    aoSelecionar={() => setMotoristaSelecionado(motorista.id)}
-                                    mostrarPaginaMotoristaIndividual={mostrarPaginaMotoristaIndividual}
-                                ></MotoristaitemLista>
+                                    onClick={() => {
+                                        centralizarProximoMotorista.current = true;
+                                        setMotoristaSelecionado(motorista.id);
+                                    }}
+                                    className="itemListaDiv"
+                                >
+                                    <MotoristaitemLista
+                                        motorista={motorista}
+                                        selecionado={motoristaSelecionado === motorista.id}
+                                        mostrarPaginaMotoristaIndividual={mostrarPaginaMotoristaIndividual}
+                                    />
+                                </div>
                             ))}
                         </div>
                     </div>
@@ -80,12 +89,17 @@ export default function Motoristas() {
                         <MapaPercurso
                             motoristaSelecionado={motoristaSelecionado}
                             setMotoristaSelecionado={setMotoristaSelecionado}
+                            mostrarPaginaMotoristaIndividual={mostrarPaginaMotoristaIndividual}
+                            centralizarProximoMotorista={centralizarProximoMotorista}
                         ></MapaPercurso>
                     </div>
                 </div>
 
                 {paginaMotoristaInidividual && (
-                    <MotoristaIndividualPage motoristaId={motoristaVerMaisId} setPaginaMotoristaInidividual={setPaginaMotoristaInidividual}></MotoristaIndividualPage>
+                    <MotoristaIndividualPage
+                        motoristaId={motoristaVerMaisId}
+                        setPaginaMotoristaInidividual={setPaginaMotoristaInidividual}
+                    ></MotoristaIndividualPage>
                 )}
 
                 <MenuSuperior></MenuSuperior>

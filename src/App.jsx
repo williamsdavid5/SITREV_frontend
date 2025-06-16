@@ -1,9 +1,10 @@
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
-import Home from './pages/Home';
+import Cercas from './pages/Cercas';
 import Motoristas from './pages/Motoristas'
 import Alertas from './pages/Alertas';
 import Veiculos from './pages/Veículos';
 import Registros from './pages/Registros';
+import Inicio from './pages/Inicio';
 import './styles/global.css'
 
 function App() {
@@ -12,7 +13,8 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
-          <Route path='/' element={<Home />} />
+          <Route path='/' element={<Inicio />} />
+          <Route path='/cercas' element={<Cercas />} />
           <Route path='/motoristas' element={<Motoristas />} />
           <Route path='/veiculos' element={<Veiculos />} />
           <Route path='/alertas' element={<Alertas />} />
