@@ -71,7 +71,7 @@ export default function Registros() {
                     <div className="esquerdaRegistros">
                         <div className="topoRegistros">
                             <h2>Registros</h2>
-                            <p>Busque entre todos os registros armazenados pelo sistema</p>
+                            <p>Procure entre registros, veículos, motoristas e datas, tudo acessível por aqui.</p>
                             <input
                                 type="text"
                                 placeholder="Pesquise qualquer coisa"
@@ -140,6 +140,7 @@ export default function Registros() {
                                             <p>{formatarDataHora(registro.data_viagem)}</p>
                                             <p><b>Motorista: </b> {registro.nome_motorista}</p>
                                             <p><b>Veículo usado: </b>{registro.identificador_veiculo}</p>
+                                            <p><b>Modelo veículo: </b>{registro.modelo_veiculo}</p>
                                             <p><b>Alertas nessa viagem: </b>{registro.quantidade_alertas}</p>
                                         </div>
                                     )

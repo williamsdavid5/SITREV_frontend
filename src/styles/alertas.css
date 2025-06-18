@@ -1,0 +1,45 @@
+.alertasPage {
+    height: calc(100vh - 45px);
+    padding-top: 45px;
+    display: flex;
+    width: 100%;
+}
+
+.alertasPage input {
+    background-color: var(--destaque2);
+    border: none;
+    color: var(--fundo);
+    border-radius: 8px;
+    padding: 5px;
+    margin: 5px 0px;
+}
+
+.esquerdaAlertas {
+    width: 30%;
+    /* height: calc(100vh -45px); */
+    background-color: var(--fundo);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.direitaAlertas {
+    width: 70%;
+    /* height: calc(100vh -45px); */
+    background-color: var(--destaque1);
+    box-sizing: border-box;
+    overflow-y: hidden;
+}
+
+.topoEsquerdaAlertasPage {
+    padding: 10px;
+}
+
+.divMostrarTodosAlertas {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    justify-content: end;
+    width: 100%;
+    margin-top: 5px;
+}

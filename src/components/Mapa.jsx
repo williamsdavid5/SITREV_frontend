@@ -8,6 +8,8 @@ import { useRef } from 'react';
 import api from '../server/api';
 import './styles/mapa.css';
 import veiculoIcon from '../assets/veiculoIcon.png';
+import vacaIcon from '../assets/vaca.png'
+
 import mapProviders from '../utils/mapProviders';
 
 import ModalCerca from './ModalCerca';
@@ -19,6 +21,15 @@ const vehicleIcon = new L.Icon({
     iconAnchor: [15, 15],
     className: 'iconeVeiculo'
 });
+
+const meuIcone = new L.Icon({
+    iconUrl: vacaIcon, // ou apenas um link direto
+    iconSize: [40, 40], // tamanho do ícone
+    iconAnchor: [20, 40], // ponto do ícone que estará na coordenada
+    popupAnchor: [0, -40], // onde o popup abrirá em relação ao ícone
+    className: 'meu-classe-icone' // opcional
+});
+
 
 // essa função é responsável por configurar os controles padrões do leaflet, dar funções a eles
 function ControladorDesenho({
@@ -57,6 +68,8 @@ function ControladorDesenho({
         map._drawControlAdded = true;
 
         map._drawnItems = drawnItems;
+
+        L.Draw.Marker.prototype.options.icon = meuIcone;
 
         map.on(L.Draw.Event.CREATED, function (event) {
             const layer = event.layer;

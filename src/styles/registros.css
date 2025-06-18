@@ -6,14 +6,14 @@
 }
 
 .esquerdaRegistros {
-    width: 35%;
+    width: 25%;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
 }
 
 .direitaRegistros {
-    width: 65%;
+    width: 75%;
     background-color: var(--destaque1);
     box-sizing: border-box;
     overflow-y: hidden;
