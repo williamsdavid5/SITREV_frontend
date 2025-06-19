@@ -33,12 +33,13 @@ function Centralizar({ coordenadas }) {
     return null;
 }
 
-export default function MapaAlertas({ viagemId }) {
+export default function MapaAlertas({ viagemId, mostrarTodos }) {
     const [provider, setProvider] = useState('stadia');
     const [posicaoAtual, setPosicaoAtual] = useState([-3.76, -49.67]);
     const [pontos, setPontos] = useState([]);
     const [registro, setRegistro] = useState(null);
     const [carregando, setcarregando] = useState(false);
+    const [todosOsALertas, setTodosOsAlertas] = useState([]);
 
     useEffect(() => {
         async function resgatarViagem(id) {
@@ -74,9 +75,31 @@ export default function MapaAlertas({ viagemId }) {
         }
     }, [registro]);
 
+    async function resgatarTodosOsALertas() {
+        try {
+            setcarregando(true);
+            let resposta = await api.get('/alertas');
+            setTodosOsAlertas(resposta.data);
+            setcarregando(false);
+        } catch (err) {
+            console.log('Erro ao resgatar todos os alertas! ', err);
+            alert('Erro resgatar todos os alertas!');
+            setcarregando(false);
+        }
+    }
+
+    useEffect(() => {
+        if (mostrarTodos) {
+            resgatarTodosOsALertas();
+        } else {
+            setTodosOsAlertas([]);
+        }
+    }, [mostrarTodos]);
+
+
     return (
         <div className='mapaPercurso'>
-            <MapContainer center={posicaoAtual} zoom={16} style={{ height: '100vh', width: '100%' }}>
+            <MapContainer center={posicaoAtual} zoom={16} style={{ height: '100vh', width: '100%' }} >
                 <TileLayer
                     key={provider}
                     url={mapProviders[provider].url}
@@ -107,7 +130,6 @@ export default function MapaAlertas({ viagemId }) {
                             </Marker>
                         ))}
 
-                        {/* Linha conectando os pontos do alerta */}
                         {registro.registros?.length > 1 && (
                             <Polyline
                                 positions={registro.registros.map(r => [
@@ -120,6 +142,29 @@ export default function MapaAlertas({ viagemId }) {
                             />
                         )}
                     </>
+                )}
+
+                {mostrarTodos && todosOsALertas.map((alerta) =>
+                    alerta.registros.map((registro, i) => (
+                        <Marker
+                            key={`alerta-${alerta.id}-registro-${i}`}
+                            position={[
+                                parseFloat(registro.latitude),
+                                parseFloat(registro.longitude)
+                            ]}
+                            icon={alertaIconLeaflet}
+                        >
+                            <Popup>
+                                <b>Motorista:</b> {alerta.motorista.nome}<br />
+                                <b>Veículo:</b> {alerta.veiculo.identificador}<br />
+                                <b>Tipo:</b> {alerta.tipo}<br />
+                                <b>Descrição:</b> {alerta.descricao}<br />
+                                <b>Velocidade:</b> {parseFloat(registro.velocidade).toFixed(1)} km/h<br />
+                                <b>Chuva:</b> {registro.chuva ? 'Sim' : 'Não'}<br />
+                                <b>Data:</b> {new Date(registro.timestamp).toLocaleString('pt-BR')}
+                            </Popup>
+                        </Marker>
+                    ))
                 )}
 
                 {carregando && (

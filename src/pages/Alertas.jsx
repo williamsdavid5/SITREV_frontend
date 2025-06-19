@@ -22,6 +22,8 @@ export default function Alertas() {
     const [carregando, setCarregando] = useState(true);
     const [alertas, setAlertas] = useState([]);
 
+    const [mostrarTodos, setMostrarTodos] = useState(false);
+
     async function carregarAlertas() {
         try {
             let resposta = await api.get('/alertas/limpo');
@@ -38,16 +40,19 @@ export default function Alertas() {
         carregarAlertas();
     }, [])
 
-    //função para a lógica da pesquisa por período
+    // para a logica de pesquisar por periodo
     function dentroDoIntervalo(dataIso) {
-        const data = new Date(dataIso);
-        const ano = data.getUTCFullYear();
-
         if (!dataInicio.dia || !dataInicio.mes || !dataFim.dia || !dataFim.mes) return true;
 
-        const inicio = new Date(`${ano}-${dataInicio.mes.padStart(2, '0')}-${dataInicio.dia.padStart(2, '0')}`);
-        const fim = new Date(`${ano}-${dataFim.mes.padStart(2, '0')}-${dataFim.dia.padStart(2, '0')}`);
-        return data >= inicio && data <= fim;
+        const data = new Date(dataIso);
+        const dia = data.getDate();
+        const mes = data.getMonth() + 1;
+
+        const dataAlerta = mes * 100 + dia;
+        const dataInicioNum = parseInt(dataInicio.mes) * 100 + parseInt(dataInicio.dia);
+        const dataFimNum = parseInt(dataFim.mes) * 100 + parseInt(dataFim.dia);
+
+        return dataAlerta >= dataInicioNum && dataAlerta <= dataFimNum;
     }
 
     //para formar a data da forma como vem do BD
@@ -121,7 +126,8 @@ export default function Alertas() {
                                 </div>
                             </div>
                             <div className="divMostrarTodosAlertas">
-                                <input type="checkbox" name="" id="" /><label htmlFor="">Mostrar todos</label>
+                                <label htmlFor="">Mostrar todos os alertas no mapa</label>
+                                <input type="checkbox" name="mostrarTodos" id="mostrarTodos" onChange={e => setMostrarTodos(e.target.checked)} />
                             </div>
                         </div>
                         <div className='divRegistros'>
@@ -154,7 +160,7 @@ export default function Alertas() {
                         </div>
                     </div>
                     <div className="direitaAlertas">
-                        <MapaAlertas viagemId={viagemSelecionada} ></MapaAlertas>
+                        <MapaAlertas viagemId={viagemSelecionada} mostrarTodos={mostrarTodos} ></MapaAlertas>
                     </div>
                 </div>
 

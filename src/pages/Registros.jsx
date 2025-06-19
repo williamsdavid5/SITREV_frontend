@@ -20,15 +20,19 @@ export default function Registros() {
     const [viagemSelecionada, setViagemSelecionada] = useState(null);
 
 
+    // para a logica de pesquisar por periodo
     function dentroDoIntervalo(dataIso) {
-        const data = new Date(dataIso);
-        const ano = data.getUTCFullYear();
-
         if (!dataInicio.dia || !dataInicio.mes || !dataFim.dia || !dataFim.mes) return true;
 
-        const inicio = new Date(`${ano}-${dataInicio.mes.padStart(2, '0')}-${dataInicio.dia.padStart(2, '0')}`);
-        const fim = new Date(`${ano}-${dataFim.mes.padStart(2, '0')}-${dataFim.dia.padStart(2, '0')}`);
-        return data >= inicio && data <= fim;
+        const data = new Date(dataIso);
+        const dia = data.getDate();
+        const mes = data.getMonth() + 1;
+
+        const dataAlerta = mes * 100 + dia;
+        const dataInicioNum = parseInt(dataInicio.mes) * 100 + parseInt(dataInicio.dia);
+        const dataFimNum = parseInt(dataFim.mes) * 100 + parseInt(dataFim.dia);
+
+        return dataAlerta >= dataInicioNum && dataAlerta <= dataFimNum;
     }
 
     async function resgatarRegistros() {
