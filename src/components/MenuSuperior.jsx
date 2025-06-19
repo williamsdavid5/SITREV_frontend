@@ -1,9 +1,11 @@
 import { NavLink } from "react-router-dom"
 import './styles/menuSuperior.css'
 
+import SITREV_TEXT from '../assets/SITREV_TEXT.svg';
+
 export default function MenuSuperior() {
     return (
-        <header>
+        <header className="menuSuperiorHeader">
             <nav className="menuSuperior">
                 <NavLink to={'/'} end className={"link"}>Início</NavLink>
                 <NavLink to={'/cercas'} end className={"link"}>Cercas</NavLink>
@@ -11,6 +13,9 @@ export default function MenuSuperior() {
                 <NavLink to={'/registros'} className={"link"}>Registros</NavLink>
                 <NavLink to={'/alertas'} className={"link"}>Alertas</NavLink>
             </nav>
+            <div>
+                <img src={SITREV_TEXT} alt="" className="sitrev_text_logo" />
+            </div>
         </header>
     )
 }
