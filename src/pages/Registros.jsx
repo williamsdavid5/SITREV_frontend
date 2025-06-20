@@ -38,7 +38,18 @@ export default function Registros() {
     async function resgatarRegistros() {
         try {
             let resposta = await api.get('/viagens/limpo');
-            setRegistros(resposta.data);
+
+            const ordenados = resposta.data.sort((a, b) => {
+                const dataA = new Date(a.data_viagem);
+                const dataB = new Date(b.data_viagem);
+
+                if (dataA > dataB) return -1;
+                if (dataA < dataB) return 1;
+
+                return b.id - a.id;
+            });
+
+            setRegistros(ordenados);
             setcarregando(false);
         } catch (err) {
             console.log('Erro ao resgatar registros, ', err);
@@ -128,6 +139,7 @@ export default function Registros() {
                                     const corresponde = (
                                         registro.nome_motorista.toLowerCase().includes(termo) ||
                                         registro.identificador_veiculo.toLowerCase().includes(termo) ||
+                                        registro.modelo_veiculo.toLowerCase().includes(termo) ||
                                         formatarDataHora(registro.data_viagem).includes(termo)
                                     );
                                     return corresponde && dentroDoIntervalo(registro.data_viagem);

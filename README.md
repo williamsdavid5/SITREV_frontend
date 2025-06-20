@@ -1,12 +1,28 @@
-# React + Vite
+# SITREV
+### Sistema de Telemetria e Registro Veicular
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este projeto propõe o desenvolvimento de um sistema de telemetria veicular completo, composto por um dispositivo embarcado baseado em microcontrolador (Arduino) responsável por coletar dados do veículo, como velocidade, localização GPS e condições ambientais, e transmitir essas informações a uma API própria, desenvolvida para centralizar e organizar os dados em um banco relacional. A visualização, edição e análise desses dados são realizadas por meio desta plataforma online interativa.
 
-Currently, two official plugins are available:
+### O que esta plataforma faz?
+- Monitora em tempo real a localização dos veículos e motoristas
+- Gerencia as cercas geográficas referentes aos limites de velocidade
+- Reúne alertas emitidos pelos dispositivos em cada veículo
+- Exibe todas as viagens dos motoristas armazenadas no banco de dados
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+# Sobre as telas
+### 1. Tela início
+A ideia é que seja uma tela simples que servirá apenas para monitoramento em tempo real, foi adicionado também um botão no popup dos veículo no mapa para que o usuário possa ver mais informações sobre o motorista em questão.
 
-## Expanding the ESLint configuration
+### 2. Cecas
+Responsável por gerenciar todas as cercas, é possível adicionar, remover e editar as cercas já existentes assim como seus limites de velocidade, cor, e tipo (por enquanto dois há dois tipos disponíveis, limitação de velocidade e área restrita). As cercas também ficam organizadas por camadas na lista lateral para facilitar a visualização e organização pelo usuário.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 3. Motoristas
+Reúne todos os registros por motoristas, assim é possível analisar individualmente as viagens e alertas para cada um, assim como localizá-los no mapa em tempo real.
+
+### 4. Registros
+A tela que irá reunir todos os registros do banco de dados (em um período de 2 meses, pois o banco de dados será configurado para excluir registros acima desse limite), nela o usuário poderá pesquisar por informações relacionadas ao registro, como a placa do veículo, nome do motorista e modelo, além de poder pesquisar por uma data específica e por período de tempo, entre uma data e outra, estes registros também são reproduzidos no mapa. Vale ressaltar esta tela também indica desenha os possíveis alertas relacionados a cada registro.
+
+### 5. Alertas
+Semelhante a tela de registros, mas dessa vez irá reunir apenas alertas e suas informações, assim o usuário poderá gerenciar melhor estes dados. Esta tela também pode mostrar todos os alertas no mapa, isso é útil para uma análise desses dados, pois mostra onde há mais alertas registrados.
+
+## Este projeto foi desenvolvido em React + Vite
