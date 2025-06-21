@@ -217,7 +217,7 @@ export default function Mapa({ cercas, cercaSelecionada, setCercaSelecionada }) 
     const [viagens, setViagens] = useState(null);
     const [viagemSelecionada, setVIagemSelecionada] = useState(null);
 
-    const [currentProvider, setCurrentProvider] = useState('stadia');
+    const [currentProvider, setCurrentProvider] = useState('openstreetmap');
 
     //resgata os dados
     useEffect(() => {

@@ -5,3 +5,21 @@
     margin-top: 45px;
     overflow: hidden;
 }
+
+@media (max-width: 800px) {
+
+    .menuSuperiorHeader,
+    .botaoPopUpMapa {
+        display: none;
+    }
+
+    .telInicioContent {
+        height: 100vh;
+        margin-top: 0;
+    }
+
+    #providerSelect {
+        top: 20px;
+        right: 20px
+    }
+}

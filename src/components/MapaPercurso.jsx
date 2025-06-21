@@ -33,7 +33,7 @@ export default function MapaPercurso({
     mostrarPaginaMotoristaIndividual,
     centralizarProximoMotorista
 }) {
-    const [currentProvider, setCurrentProvider] = useState('stadia');
+    const [currentProvider, setCurrentProvider] = useState('openstreetmap');
     const [cercas, setCercas] = useState([]);
     const [viagens, setViagens] = useState([]);
     const [viagemSelecionada, setVIagemSelecionada] = useState(null);

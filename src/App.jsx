@@ -11,7 +11,7 @@ function App() {
 
   return (
     <>
-      <BrowserRouter>
+      <BrowserRouter basename="/SITREV_frontend/">
         <Routes>
           <Route path='/' element={<Inicio />} />
           <Route path='/cercas' element={<Cercas />} />

@@ -35,7 +35,7 @@ function CentralizarMapa({ coordenadas }) {
 }
 
 export default function MapaMotoristaIndividual({ motorista, viagemSelecionada, alertaSelecionado, setMostrarTodos, mostrarTodos }) {
-    const [currentProvider, setCurrentProvider] = useState('stadia');
+    const [currentProvider, setCurrentProvider] = useState('openstreetmap');
     const [posicaoAtual, setPosicaoAtual] = useState([-3.76, -49.67]);
     const [pontos, setPontos] = useState([]);
 

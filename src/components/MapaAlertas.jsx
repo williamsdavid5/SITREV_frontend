@@ -34,7 +34,7 @@ function Centralizar({ coordenadas }) {
 }
 
 export default function MapaAlertas({ viagemId, mostrarTodos }) {
-    const [provider, setProvider] = useState('stadia');
+    const [provider, setProvider] = useState('openstreetmap');
     const [posicaoAtual, setPosicaoAtual] = useState([-3.76, -49.67]);
     const [pontos, setPontos] = useState([]);
     const [registro, setRegistro] = useState(null);
