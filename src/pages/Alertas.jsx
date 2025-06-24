@@ -9,6 +9,7 @@ import Registros from './Registros';
 
 import MapaAlertas from '../components/MapaAlertas';
 
+//tela responsável
 export default function Alertas() {
 
     // para a pesquisa entre os registros

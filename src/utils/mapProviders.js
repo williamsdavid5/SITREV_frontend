@@ -1,8 +1,8 @@
 const mapProviders = {
-    openstreetmap: {
-        name: "Padrão",
-        url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    openstreetmap_hot: {
+        name: "OpenStreetMap HOT",
+        url: "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Tiles style by <a href="https://www.hotosm.org/" target="_blank">Humanitarian OpenStreetMap Team</a> hosted by <a href="https://openstreetmap.fr/" target="_blank">OpenStreetMap France</a>',
         maxZoom: 19
     },
     cyclosm: {
@@ -10,6 +10,18 @@ const mapProviders = {
         url: "https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png",
         attribution: '<a href="https://github.com/cyclosm/cyclosm-cartocss-style/releases" title="CyclOSM - Open Bicycle render">CyclOSM</a> | Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 20
+    },
+    esri: {
+        name: "Esri Satélite",
+        url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        attribution: "Tiles © Esri — Source: Esri, USGS, NOAA",
+        maxZoom: 19
+    },
+    openstreetmap: {
+        name: "Open street",
+        url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
     },
     memomaps: {
         name: "Memomaps",
@@ -30,26 +42,20 @@ const mapProviders = {
         maxZoom: 20,
         key: "494875da-da82-4808-9998-d52ad50dd6ba"
     },
-    mtbmap: {
-        name: "black and white",
-        url: "https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}{r}.png",
-        attribution: '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://www.stamen.com/" target="_blank">Stamen Design</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: 20
+    openstreetmap_cat: {
+        name: "OpenStreetMap CAT",
+        url: "https://tile.openstreetmap.bzh/ca/{z}/{x}/{y}.png",
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Tiles courtesy of <a href="https://www.openstreetmap.cat" target="_blank">Breton OpenStreetMap Team</a>',
+        maxZoom: 19
     },
-
-    esri: {
-        name: "Esri Satélite",
-        url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-        attribution: "Tiles © Esri — Source: Esri, USGS, NOAA",
+    esri_world_street: {
+        name: "Esri World Street",
+        url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012',
         maxZoom: 19
     },
 
-    gibsModis: {
-        name: "NASA GIBS MODIS",
-        url: "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_CorrectedReflectance_TrueColor/default/2024-06-20/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg",
-        attribution: 'Imagery courtesy NASA EOSDIS GIBS',
-        maxZoom: 9
-    }
+    default: 'openstreetmap_hot'
 };
 
 export default mapProviders;

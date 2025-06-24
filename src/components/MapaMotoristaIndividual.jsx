@@ -35,7 +35,7 @@ function CentralizarMapa({ coordenadas }) {
 }
 
 export default function MapaMotoristaIndividual({ motorista, viagemSelecionada, alertaSelecionado, setMostrarTodos, mostrarTodos }) {
-    const [currentProvider, setCurrentProvider] = useState('openstreetmap');
+    const [currentProvider, setCurrentProvider] = useState(mapProviders.default);
     const [posicaoAtual, setPosicaoAtual] = useState([-3.76, -49.67]);
     const [pontos, setPontos] = useState([]);
 
@@ -154,11 +154,13 @@ export default function MapaMotoristaIndividual({ motorista, viagemSelecionada, 
                 onChange={(e) => setCurrentProvider(e.target.value)}
                 className="map-provider-select"
             >
-                {Object.entries(mapProviders).map(([id, provider]) => (
-                    <option key={id} value={id}>
-                        {provider.name}
-                    </option>
-                ))}
+                {Object.entries(mapProviders)
+                    .filter(([id]) => id !== 'default')
+                    .map(([id, provider]) => (
+                        <option key={id} value={id}>
+                            {provider.name}
+                        </option>
+                    ))}
             </select>
         </div>
     );

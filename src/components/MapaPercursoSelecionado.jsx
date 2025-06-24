@@ -42,7 +42,7 @@ function Centralizar({ coordenadas }) {
 }
 
 export default function MapaPercursoSelecionado({ viagemId, alertas }) {
-    const [provider, setProvider] = useState('openstreetmap');
+    const [provider, setProvider] = useState(mapProviders.default);
     const [posicaoAtual, setPosicaoAtual] = useState([-3.76, -49.67]);
     const [pontos, setPontos] = useState([]);
     const [registro, setRegistro] = useState(null);
@@ -161,11 +161,13 @@ export default function MapaPercursoSelecionado({ viagemId, alertas }) {
                 onChange={(e) => setProvider(e.target.value)}
                 className="map-provider-select"
             >
-                {Object.entries(mapProviders).map(([id, p]) => (
-                    <option key={id} value={id}>
-                        {p.name}
-                    </option>
-                ))}
+                {Object.entries(mapProviders)
+                    .filter(([id]) => id !== 'default')
+                    .map(([id, provider]) => (
+                        <option key={id} value={id}>
+                            {provider.name}
+                        </option>
+                    ))}
             </select>
         </div>
     );

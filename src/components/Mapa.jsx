@@ -217,7 +217,7 @@ export default function Mapa({ cercas, cercaSelecionada, setCercaSelecionada }) 
     const [viagens, setViagens] = useState(null);
     const [viagemSelecionada, setVIagemSelecionada] = useState(null);
 
-    const [currentProvider, setCurrentProvider] = useState('openstreetmap');
+    const [currentProvider, setCurrentProvider] = useState(mapProviders.default);
 
     //resgata os dados
     useEffect(() => {
@@ -352,11 +352,14 @@ export default function Mapa({ cercas, cercaSelecionada, setCercaSelecionada }) 
                 onChange={(e) => setCurrentProvider(e.target.value)}
                 className="map-provider-select"
             >
-                {Object.entries(mapProviders).map(([id, provider]) => (
-                    <option key={id} value={id}>
-                        {provider.name}
-                    </option>
-                ))}
+                {Object.entries(mapProviders)
+                    .filter(([id]) => id !== 'default')
+                    .map(([id, provider]) => (
+                        <option key={id} value={id}>
+                            {provider.name}
+                        </option>
+                    ))}
+
             </select>
 
         </div>

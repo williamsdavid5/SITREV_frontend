@@ -127,7 +127,7 @@ export default function Cercas() {
                         <button className="botaoNovaCamada" onClick={() => {
                             setPopUpNovaCamada(true);
                             setModalEditarCamadaAberto(false);
-                        }}>Nova</button>
+                        }}>Nova Camada</button>
                     </div>
                     {popUpNovaCamada && (
                         <div className="novaCamada">
