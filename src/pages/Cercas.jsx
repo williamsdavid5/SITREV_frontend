@@ -1,16 +1,22 @@
-import { useNavigate } from "react-router-dom"
 import api from "../server/api";
-import { useEffect, useState } from "react";
 import '../styles/cercas.css';
 
+import { useEffect, useState } from "react";
+
+
 import MenuSuperior from "../components/MenuSuperior";
-import Camada from "../components/Camada";
-import Mapa from "../components/Mapa";
-import ModalCerca from "../components/ModalCerca";
+import Camada from "../components/Camada"; //item na lista lateral
+import Mapa from "../components/Mapa"; //mapa de cercas, é simplesmente "mapa" pois foi o primeiro componente mapa que eu criei
+import ModalCerca from "../components/ModalCerca"; //modal para edição de cercas
+
+//diferente do que o nome sugere, isto não é um modal, é uma pequena janela a ser encaixada na lista
 import ModalEditarCamada from "../components/ModalEditarCamada";
+
+//os nomes já sugerem o que é!
 import ModalAplicandoMudancas from "../components/ModalAplicandoMudancas";
 import ModalCarregandoDados from "../components/ModalCarregandoDados";
 
+//pagina responsável pelo gerenciamento de cercas e camadas de cerca
 export default function Cercas() {
 
     const [carregando, setCarregando] = useState(true); //para mostrar o loading
@@ -63,6 +69,9 @@ export default function Cercas() {
         resgatarCamadas();
     }, [])
 
+    //escuta o evento "abrir modal cerca"
+    //quando isso acontece, a cerca selecionada é setada
+    //e o modal de edição de cercas é aberto
     useEffect(() => {
         const handler = (e) => {
             setCercaSelecionada(e.detail);
@@ -112,6 +121,7 @@ export default function Cercas() {
     }
 
     //uma função simples para abrir o modal de editar camadas
+    //mais uma vez, não é um modal, é uma janela encaixada na lista lateral!
     function abrirModalEditarCamada(camada) {
         setCamadaSelecionada(camada);
         setModalEditarCamadaAberto(true);
@@ -164,6 +174,7 @@ export default function Cercas() {
                 </div>
                 <div className="content">
                     <Mapa cercas={cercas} cercaSelecionada={cercaSelecionada} setCercaSelecionada={setCercaSelecionada} ></Mapa>
+                    <div className="divAuxiliarSombra" style={{ width: '80%' }}></div>
 
                     {modalVisivel && (
                         <ModalCerca

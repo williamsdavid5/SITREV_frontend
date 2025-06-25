@@ -165,6 +165,7 @@ export default function Registros() {
                     </div>
                     <div className="direitaRegistros">
                         <MapaPercursoSelecionado viagemId={viagemSelecionada?.id} />
+                        <div className="divAuxiliarSombra" style={{ width: '75%' }}></div>
                     </div>
                 </div>
                 <MenuSuperior></MenuSuperior>

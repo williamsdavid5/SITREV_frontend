@@ -5,8 +5,9 @@ import api from '../server/api';
 import loadingGif from '../assets/loadingGif.gif';
 import fecharIcon from '../assets/fecharIcon.png'
 
-import MapaMotoristaIndividual from './MapaMotoristaIndividual';
+import MapaMotoristaIndividual from './MapaMotoristaIndividual'; //mapa que mostra apenas um percurso por vez, serve para visualização de historicos
 
+//página para exibir informações de um motorista especifico
 export default function MotoristaIndividualPage({ motoristaId, setPaginaMotoristaInidividual }) {
 
     const [motorista, setMotorista] = useState(); //motorista a ser exibido
@@ -185,6 +186,7 @@ export default function MotoristaIndividualPage({ motoristaId, setPaginaMotorist
                         mostrarTodos={mostrarTodos}
                         setMostrarTodos={setMostrarTodos}
                     />
+                    <div className="divAuxiliarSombra" style={{ width: '70%' }}></div>
                 </div>
             </div>
         )

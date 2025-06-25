@@ -162,6 +162,7 @@ export default function Alertas() {
                     </div>
                     <div className="direitaAlertas">
                         <MapaAlertas viagemId={viagemSelecionada} mostrarTodos={mostrarTodos} ></MapaAlertas>
+                        <div className="divAuxiliarSombra" style={{ width: '70%' }}></div>
                     </div>
                 </div>
 

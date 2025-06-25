@@ -92,6 +92,7 @@ export default function Motoristas() {
                             mostrarPaginaMotoristaIndividual={mostrarPaginaMotoristaIndividual}
                             centralizarProximoMotorista={centralizarProximoMotorista}
                         ></MapaPercurso>
+                        <div className="divAuxiliarSombra" style={{ width: '75%' }}></div>
                     </div>
                 </div>
 
