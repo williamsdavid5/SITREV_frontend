@@ -116,6 +116,20 @@ export default function MapaPercurso({
         resgatarVeiculosRegistro();
     }, [])
 
+    function formatarDataHora(isoString) {
+        const data = new Date(isoString);
+
+        const dia = String(data.getUTCDate()).padStart(2, '0');
+        const mes = String(data.getUTCMonth() + 1).padStart(2, '0');
+        const ano = data.getUTCFullYear();
+
+        const hora = String(data.getUTCHours()).padStart(2, '0');
+        const minuto = String(data.getUTCMinutes()).padStart(2, '0');
+
+        return `${dia}/${mes}/${ano} - ${hora}:${minuto}`;
+    }
+
+
     return (
         <div className='mapaPercurso'>
             {/* container do mapa */}
@@ -160,18 +174,19 @@ export default function MapaPercurso({
                     const ultimoPonto = viagem.registros[viagem.registros.length - 1];
 
                     const dataObj = new Date(ultimoPonto.timestamp);
-                    const dataFormatada = dataObj.toLocaleDateString("pt-BR", {
-                        timeZone: "America/Sao_Paulo",
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                    });
-                    const horaFormatada = dataObj.toLocaleTimeString("pt-BR", {
-                        timeZone: "America/Sao_Paulo",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                    });
-                    const ultimoHorario = `${horaFormatada}, ${dataFormatada}`;
+                    // const dataFormatada = dataObj.toLocaleDateString("pt-BR", {
+                    //     // timeZone: "America/Sao_Paulo",
+                    //     day: "2-digit",
+                    //     month: "2-digit",
+                    //     year: "numeric",
+                    // });
+                    // const horaFormatada = dataObj.toLocaleTimeString("pt-BR", {
+                    //     // timeZone: "America/Sao_Paulo",
+                    //     hour: "2-digit",
+                    //     minute: "2-digit",
+                    // });
+                    // const ultimoHorario = `${horaFormatada}, ${dataFormatada}`;
+                    const ultimoHorario = formatarDataHora(ultimoPonto.timestamp);
                     const position = [parseFloat(ultimoPonto.latitude), parseFloat(ultimoPonto.longitude)];
 
                     if (!position[0] || !position[1]) return null;
@@ -194,7 +209,7 @@ export default function MapaPercurso({
                                 <div>
                                     <b>Veículo: {veiculo.identificador}</b><br />
                                     <b>Motorista:</b> {viagem.motorista.nome}<br />
-                                    Última leitura às <b>{ultimoHorario}</b><br />
+                                    Última leitura: <b>{ultimoHorario}</b><br />
                                     <button
                                         className='botaoPopUpMapa'
                                         onClick={() => mostrarPaginaMotoristaIndividual(viagem.motorista.id)}

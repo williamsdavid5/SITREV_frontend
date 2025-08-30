@@ -38,6 +38,7 @@ export default function Registros() {
     async function resgatarRegistros() {
         try {
             let resposta = await api.get('/viagens/limpo');
+            console.log(resposta);
 
             const ordenados = resposta.data.sort((a, b) => {
                 const dataA = new Date(a.data_viagem);
