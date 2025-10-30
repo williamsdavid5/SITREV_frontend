@@ -10,6 +10,7 @@ export default function Registros() {
 
     const [registros, setRegistros] = useState([]);
     const [carregando, setcarregando] = useState(true);
+    const [carregandoRegistro, setcarregandoRegistro] = useState(false);
 
     // para a pesquisa entre os registros
     const [termoBusca, setTermoBusca] = useState('');
@@ -151,7 +152,11 @@ export default function Registros() {
                                         <div
                                             className={`registroItemLista ${viagemSelecionada && viagemSelecionada.id === registro.id ? 'selecionado' : ''}`}
                                             key={registro.id}
-                                            onClick={() => setViagemSelecionada(registro)}
+                                            onClick={() => {
+                                                setViagemSelecionada(registro);
+                                                setcarregandoRegistro(true);
+                                                // setcarregando(true);
+                                            }}
                                         >
 
                                             <p>{formatarDataHora(registro.data_viagem)}</p>
@@ -165,7 +170,7 @@ export default function Registros() {
                         </div>
                     </div>
                     <div className="direitaRegistros">
-                        <MapaPercursoSelecionado viagemId={viagemSelecionada?.id} />
+                        <MapaPercursoSelecionado viagemId={viagemSelecionada?.id} carregandoRegistros={carregandoRegistro} setCarregandoRegistros={setcarregandoRegistro} />
                         <div className="divAuxiliarSombra" style={{ width: '75%' }}></div>
                     </div>
                 </div>

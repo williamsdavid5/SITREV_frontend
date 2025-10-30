@@ -72,6 +72,11 @@
     cursor: pointer;
 }
 
+.registroItemLista.selecionado {
+    background-color: black;
+    color: white;
+}
+
 .registroItemLista:hover {
     background-color: var(--destaque1);
     color: var(--fundo);

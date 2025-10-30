@@ -33,6 +33,51 @@ function Centralizar({ coordenadas }) {
     return null;
 }
 
+function LinhaComSetasVermelha({ pontos }) {
+    const map = useMap();
+
+    useEffect(() => {
+        if (!pontos || pontos.length < 2) return;
+
+        const latlngs = pontos.map(p => [parseFloat(p.latitude), parseFloat(p.longitude)]);
+
+        // Linha pontilhada vermelha
+        const linha = L.polyline(latlngs, {
+            color: '#ff0000',
+            weight: 3,
+            opacity: 0.7,
+            dashArray: '6, 10'
+        }).addTo(map);
+
+        // Setas de direção vermelhas
+        const decorator = L.polylineDecorator(linha, {
+            patterns: [
+                {
+                    offset: 25,
+                    repeat: 150,
+                    symbol: L.Symbol.arrowHead({
+                        pixelSize: 16,
+                        polygon: true,
+                        pathOptions: {
+                            color: '#ff0000',
+                            fillOpacity: 1,
+                            weight: 1,
+                            opacity: 0.9
+                        }
+                    })
+                }
+            ]
+        }).addTo(map);
+
+        return () => {
+            map.removeLayer(linha);
+            map.removeLayer(decorator);
+        };
+    }, [map, pontos]);
+
+    return null;
+}
+
 export default function MapaAlertas({ viagemId, mostrarTodos }) {
     const [provider, setProvider] = useState(mapProviders.default);
     const [posicaoAtual, setPosicaoAtual] = useState([-3.76, -49.67]);
@@ -66,12 +111,6 @@ export default function MapaAlertas({ viagemId, mostrarTodos }) {
             const ultimo = registro.registros.at(-1);
             const coords = [parseFloat(ultimo.latitude), parseFloat(ultimo.longitude)];
             setPosicaoAtual(coords);
-
-            const caminho = registro.registros.map(p => [
-                parseFloat(p.latitude),
-                parseFloat(p.longitude)
-            ]);
-            setPontos(caminho);
         }
     }, [registro]);
 
@@ -108,6 +147,7 @@ export default function MapaAlertas({ viagemId, mostrarTodos }) {
                 />
                 <Centralizar coordenadas={posicaoAtual} />
 
+
                 {/* Renderização do alerta */}
                 {registro && (
                     <>
@@ -130,42 +170,44 @@ export default function MapaAlertas({ viagemId, mostrarTodos }) {
                             </Marker>
                         ))}
 
-                        {/* {registro.registros?.length > 1 && (
-                            <Polyline
-                                positions={registro.registros.map(r => [
-                                    parseFloat(r.latitude),
-                                    parseFloat(r.longitude)
-                                ])}
-                                color="red"
-                                weight={3}
-                                dashArray="6"
-                            />
-                        )} */}
+                        {/* Linha com setas vermelhas para o alerta individual */}
+                        {registro.registros?.length > 1 && (
+                            <LinhaComSetasVermelha pontos={registro.registros} />
+                        )}
                     </>
                 )}
 
-                {mostrarTodos && todosOsALertas.map((alerta) =>
-                    alerta.registros.map((registro, i) => (
-                        <Marker
-                            key={`alerta-${alerta.id}-registro-${i}`}
-                            position={[
-                                parseFloat(registro.latitude),
-                                parseFloat(registro.longitude)
-                            ]}
-                            icon={alertaIconLeaflet}
-                        >
-                            <Popup>
-                                <b>Motorista:</b> {alerta.motorista.nome}<br />
-                                <b>Veículo:</b> {alerta.veiculo.identificador}<br />
-                                <b>Tipo:</b> {alerta.tipo}<br />
-                                <b>Descrição:</b> {alerta.descricao}<br />
-                                <b>Velocidade:</b> {parseFloat(registro.velocidade).toFixed(1)} km/h<br />
-                                <b>Chuva:</b> {registro.chuva ? 'Sim' : 'Não'}<br />
-                                <b>Data:</b> {new Date(registro.timestamp).toLocaleString('pt-BR')}
-                            </Popup>
-                        </Marker>
-                    ))
-                )}
+
+                {mostrarTodos && todosOsALertas.map((alerta) => (
+                    <div key={`alerta-${alerta.id}`}>
+                        {/* Marcadores para cada registro do alerta */}
+                        {alerta.registros?.map((registro, i) => (
+                            <Marker
+                                key={`alerta-${alerta.id}-registro-${i}`}
+                                position={[
+                                    parseFloat(registro.latitude),
+                                    parseFloat(registro.longitude)
+                                ]}
+                                icon={alertaIconLeaflet}
+                            >
+                                <Popup>
+                                    <b>Motorista:</b> {alerta.motorista.nome}<br />
+                                    <b>Veículo:</b> {alerta.veiculo.identificador}<br />
+                                    <b>Tipo:</b> {alerta.tipo}<br />
+                                    <b>Descrição:</b> {alerta.descricao}<br />
+                                    <b>Velocidade:</b> {parseFloat(registro.velocidade).toFixed(1)} km/h<br />
+                                    <b>Chuva:</b> {registro.chuva ? 'Sim' : 'Não'}<br />
+                                    <b>Data:</b> {new Date(registro.timestamp).toLocaleString('pt-BR')}
+                                </Popup>
+                            </Marker>
+                        ))}
+
+                        {/* Linha com setas vermelhas para cada alerta */}
+                        {alerta.registros?.length > 1 && (
+                            <LinhaComSetasVermelha pontos={alerta.registros} />
+                        )}
+                    </div>
+                ))}
 
                 {carregando && (
                     <div className='carregandoPercursoDiv'>

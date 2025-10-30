@@ -146,7 +146,7 @@ export default function Alertas() {
                                 .map(alerta => {
                                     return (
                                         <div
-                                            className={`registroItemLista ${viagemSelecionada && viagemSelecionada.id === alerta.id ? 'selecionado' : ''}`}
+                                            className={`registroItemLista ${viagemSelecionada === alerta.alerta_id ? 'selecionado' : ''}`}
                                             key={alerta.alerta_id}
                                             onClick={() => setViagemSelecionada(alerta.alerta_id)}
                                         >
