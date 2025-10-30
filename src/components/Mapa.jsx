@@ -4,11 +4,14 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw';
 import 'leaflet-draw/dist/leaflet.draw.css';
+import 'leaflet-polylinedecorator';
+import { useMapEvent } from 'react-leaflet';
 import { useRef } from 'react';
 import api from '../server/api';
 import './styles/mapa.css';
 import veiculoIcon from '../assets/veiculoIcon.png';
-import vacaIcon from '../assets/vaca.png'
+import pontoIcon from '../assets/pontoIcon.png'
+import startIcon from '../assets/startIcon.png';
 
 import mapProviders from '../utils/mapProviders';
 
@@ -22,14 +25,76 @@ const vehicleIcon = new L.Icon({
     className: 'iconeVeiculo'
 });
 
-const meuIcone = new L.Icon({
-    iconUrl: vacaIcon, // ou apenas um link direto
-    iconSize: [40, 40], // tamanho do ícone
-    iconAnchor: [20, 40], // ponto do ícone que estará na coordenada
-    popupAnchor: [0, -40], // onde o popup abrirá em relação ao ícone
-    className: 'meu-classe-icone' // opcional
+const pontoPercursoIcon = new L.Icon({
+    iconUrl: pontoIcon, // ou apenas um link direto
+    iconSize: [35, 35], // tamanho do ícone
+    iconAnchor: [15, 15], // ponto do ícone que estará na coordenada
+    popupAnchor: [0, -15], // onde o popup abrirá em relação ao ícone
+    className: 'pontoIcon' // opcional
 });
 
+const starPercursotIcon = new L.Icon({
+    iconUrl: startIcon, // ou apenas um link direto
+    iconSize: [35, 35], // tamanho do ícone
+    iconAnchor: [15, 15], // ponto do ícone que estará na coordenada
+    popupAnchor: [0, -15], // onde o popup abrirá em relação ao ícone
+    className: 'startIcon' // opcional
+});
+
+function LinhaComSetas({ pontos }) {
+    const map = useMap();
+
+    useEffect(() => {
+        if (!pontos || pontos.length < 2) return;
+
+        const latlngs = pontos.map(p => [parseFloat(p.latitude), parseFloat(p.longitude)]);
+
+        // Linha pontilhada
+        const linha = L.polyline(latlngs, {
+            color: '#007bff',
+            weight: 3,
+            opacity: 0.7,
+            dashArray: '6, 10' // padrão de linha pontilhada
+        }).addTo(map);
+
+        // Setas de direção (maiores e mais visíveis)
+        const decorator = L.polylineDecorator(linha, {
+            patterns: [
+                {
+                    offset: 25, // início da primeira seta
+                    repeat: 150, // espaçamento entre setas
+                    symbol: L.Symbol.arrowHead({
+                        pixelSize: 16, // tamanho da seta (maior)
+                        polygon: true,
+                        pathOptions: {
+                            color: '#007bff',
+                            fillOpacity: 1,
+                            weight: 1,
+                            opacity: 0.9
+                        }
+                    })
+                }
+            ]
+        }).addTo(map);
+
+        return () => {
+            map.removeLayer(linha);
+            map.removeLayer(decorator);
+        };
+    }, [map, pontos]);
+
+    return null;
+}
+
+//para que as viagens não fiquem sempre visíveis
+function MapaClickReset({ setViagemSelecionada }) {
+    useMapEvent('click', () => {
+        // Quando o usuário clicar em qualquer parte do mapa (não em markers)
+        setViagemSelecionada(null);
+    });
+
+    return null;
+}
 
 // essa função é responsável por configurar os controles padrões do leaflet, dar funções a eles
 function ControladorDesenho({
@@ -38,7 +103,8 @@ function ControladorDesenho({
     layerRefs,
     setModalVisivel,
     setNovaCercaCoordenadas,
-    setCercaSelecionada
+    setCercaSelecionada,
+    setVIagemSelecionada
 }) {
     const map = useMap();
     const [pontosMarcados, setPontosMarcados] = useState([]);
@@ -69,7 +135,7 @@ function ControladorDesenho({
 
         map._drawnItems = drawnItems;
 
-        L.Draw.Marker.prototype.options.icon = meuIcone;
+        L.Draw.Marker.prototype.options.icon = pontoPercursoIcon;
 
         map.on(L.Draw.Event.CREATED, function (event) {
             const layer = event.layer;
@@ -183,6 +249,10 @@ function ControladorDesenho({
 
             layerRefs.current[cerca.id] = poligono;
 
+            poligono.on('click', () => {
+                setVIagemSelecionada(null);
+            });
+
             poligono.bindPopup(`
         <b>${cerca.nome}</b><br>
         Máx: ${cerca.velocidade_max} km/h<br>
@@ -286,6 +356,11 @@ export default function Mapa({ cercas, cercaSelecionada, setCercaSelecionada }) 
                     setModalVisivel={setModalVisivel}
                     layerRefs={layerRefs}
                     setNovaCercaCoordenadas={setNovaCercaCoordenadas}
+                    setVIagemSelecionada={setVIagemSelecionada}
+                />
+
+                <MapaClickReset
+                    setViagemSelecionada={setVIagemSelecionada}
                 />
 
                 {viagens && Array.isArray(viagens) ? viagens.map((veiculo) => {
@@ -294,19 +369,6 @@ export default function Mapa({ cercas, cercaSelecionada, setCercaSelecionada }) 
 
                     const ultimoPonto = viagem.registros[viagem.registros.length - 1];
 
-                    // const dataObj = new Date(ultimoPonto.timestamp);
-                    // const dataFormatada = dataObj.toLocaleDateString("pt-BR", {
-                    //     timeZone: "America/Sao_Paulo",
-                    //     day: "2-digit",
-                    //     month: "2-digit",
-                    //     year: "numeric",
-                    // });
-                    // const horaFormatada = dataObj.toLocaleTimeString("pt-BR", {
-                    //     timeZone: "America/Sao_Paulo",
-                    //     hour: "2-digit",
-                    //     minute: "2-digit",
-                    // });
-                    // const ultimoHorario = `${horaFormatada}, ${dataFormatada}`;
                     const ultimoHorario = formatarDataHora(ultimoPonto.timestamp);
                     const position = [parseFloat(ultimoPonto.latitude), parseFloat(ultimoPonto.longitude)];
 
@@ -339,14 +401,45 @@ export default function Mapa({ cercas, cercaSelecionada, setCercaSelecionada }) 
                     const veiculoComViagem = viagens.find(v => v.viagem.id === viagemSelecionada);
                     if (!veiculoComViagem) return null;
 
-                    const pontos = veiculoComViagem.viagem.registros.map(p =>
-                        [parseFloat(p.latitude), parseFloat(p.longitude)]
-                    );
+                    const pontos = veiculoComViagem.viagem.registros.filter(p => p.latitude && p.longitude);
 
                     return (
-                        <Polyline positions={pontos} color="blue" />
+                        <>
+                            {pontos.map((ponto, index) => {
+                                const position = [parseFloat(ponto.latitude), parseFloat(ponto.longitude)];
+                                const horario = formatarDataHora(ponto.timestamp);
+
+                                // Define o ícone: start para o primeiro ponto, normal para os demais
+                                const iconToUse = index === 0 ? starPercursotIcon : pontoPercursoIcon;
+
+                                return (
+                                    <Marker key={ponto.id} position={position} icon={iconToUse}>
+                                        <Popup>
+                                            <div>
+                                                {index === 0 && (
+                                                    <>
+                                                        <b style={{ color: 'green' }}>INÍCIO DO PERCURSO</b><br />
+                                                    </>
+                                                )}
+                                                <b>Horário:</b> {horario}<br />
+                                                <b>Velocidade:</b> {ponto.velocidade} km/h<br />
+                                                <b>Limite aplicado:</b> {ponto.limite_aplicado ?? 0} km/h<br />
+                                                {ponto.chuva ? '🌧️ Chuva detectada' : '☀️ Tempo seco'}
+                                            </div>
+                                        </Popup>
+                                    </Marker>
+                                );
+                            })}
+
+                            {/* Linha com setas indicando direção */}
+                            <LinhaComSetas pontos={pontos} />
+                        </>
                     );
                 })()}
+
+
+
+
 
             </MapContainer>
 

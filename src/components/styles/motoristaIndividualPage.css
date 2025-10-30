@@ -21,6 +21,10 @@
     flex-direction: column;
 }
 
+#motoristaIndividualPageEsquerda p {
+    font-size: 13px;
+}
+
 #motoristaIndividualPageDireita {
     width: 70%;
     height: calc(100vh - 45px);
@@ -121,4 +125,13 @@
     padding: 5px;
     border-radius: 5px;
     padding-left: 8px;
+}
+
+.inputPesquisaMotoristaIndividual {
+    background-color: black;
+    border: none;
+    margin: 5px 0px;
+    padding: 5px 5px;
+    border-radius: 5px;
+    color: white;
 }

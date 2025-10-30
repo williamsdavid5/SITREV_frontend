@@ -130,7 +130,7 @@ export default function MapaAlertas({ viagemId, mostrarTodos }) {
                             </Marker>
                         ))}
 
-                        {registro.registros?.length > 1 && (
+                        {/* {registro.registros?.length > 1 && (
                             <Polyline
                                 positions={registro.registros.map(r => [
                                     parseFloat(r.latitude),
@@ -140,7 +140,7 @@ export default function MapaAlertas({ viagemId, mostrarTodos }) {
                                 weight={3}
                                 dashArray="6"
                             />
-                        )}
+                        )} */}
                     </>
                 )}
 

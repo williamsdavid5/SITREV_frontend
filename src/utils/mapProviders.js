@@ -1,4 +1,12 @@
 const mapProviders = {
+
+    openstreetmap_france: {
+        name: "OpenStreetMap France",
+        url: "https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png",
+        attribution: '&copy; OpenStreetMap France | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 20
+    },
+
     openstreetmap_hot: {
         name: "OpenStreetMap HOT",
         url: "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
@@ -55,7 +63,7 @@ const mapProviders = {
         maxZoom: 19
     },
 
-    default: 'openstreetmap_hot'
+    default: 'openstreetmap_france'
 };
 
 export default mapProviders;

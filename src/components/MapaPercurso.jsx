@@ -1,8 +1,10 @@
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import './styles/mapa.css';
+import 'leaflet-polylinedecorator';
 
 import { useEffect, useState } from 'react';
+import { useMapEvent } from 'react-leaflet';
 
 import { MapContainer, Marker, Popup, TileLayer, useMap, Polyline, Polygon, Circle } from 'react-leaflet';
 import L from 'leaflet';
@@ -15,6 +17,17 @@ import mapProviders from '../utils/mapProviders'; //providers para alterar a vis
 import veiculoIcon from '../assets/veiculoIcon.png';
 import veiculoIconSelecionado from '../assets/veiculoIconSelecionado.png'
 import loadingGif from '../assets/loadingGif.gif'
+import pontoIcon from '../assets/pontoIcon.png'
+import startIcon from '../assets/startIcon.png';
+import alertaIcon from '../assets/alertaIcon.png';
+
+const starPercursotIcon = new L.Icon({
+    iconUrl: startIcon, // ou apenas um link direto
+    iconSize: [35, 35], // tamanho do ícone
+    iconAnchor: [15, 15], // ponto do ícone que estará na coordenada
+    popupAnchor: [0, -15], // onde o popup abrirá em relação ao ícone
+    className: 'startIcon' // opcional
+});
 
 //icon personalizado do veiculo
 const vehicleIcon = new L.Icon({
@@ -30,6 +43,114 @@ const vehicleIconSelecionado = new L.Icon({
     iconAnchor: [15, 15],
     className: 'iconeVeiculo'
 });
+
+const pontoPercursoIcon = new L.Icon({
+    iconUrl: pontoIcon, // ou apenas um link direto
+    iconSize: [35, 35], // tamanho do ícone
+    iconAnchor: [15, 15], // ponto do ícone que estará na coordenada
+    popupAnchor: [0, -15], // onde o popup abrirá em relação ao ícone
+    className: 'pontoIcon' // opcional
+});
+
+function LinhaComSetas({ pontos }) {
+    const map = useMap();
+
+    useEffect(() => {
+        if (!pontos || pontos.length < 2) return;
+
+        const latlngs = pontos.map(p => [parseFloat(p.latitude), parseFloat(p.longitude)]);
+
+        // Linha pontilhada
+        const linha = L.polyline(latlngs, {
+            color: '#007bff',
+            weight: 3,
+            opacity: 0.7,
+            dashArray: '6, 10' // padrão de linha pontilhada
+        }).addTo(map);
+
+        // Setas de direção (maiores e mais visíveis)
+        const decorator = L.polylineDecorator(linha, {
+            patterns: [
+                {
+                    offset: 25, // início da primeira seta
+                    repeat: 150, // espaçamento entre setas
+                    symbol: L.Symbol.arrowHead({
+                        pixelSize: 16, // tamanho da seta (maior)
+                        polygon: true,
+                        pathOptions: {
+                            color: '#007bff',
+                            fillOpacity: 1,
+                            weight: 1,
+                            opacity: 0.9
+                        }
+                    })
+                }
+            ]
+        }).addTo(map);
+
+        return () => {
+            map.removeLayer(linha);
+            map.removeLayer(decorator);
+        };
+    }, [map, pontos]);
+
+    return null;
+}
+
+function LinhaComSetasVermelha({ pontos }) {
+    const map = useMap();
+
+    useEffect(() => {
+        if (!pontos || pontos.length < 2) return;
+
+        const latlngs = pontos.map(p => [parseFloat(p[0]), parseFloat(p[1])]);
+
+        const linha = L.polyline(latlngs, {
+            color: '#ff0000',
+            weight: 3,
+            opacity: 0.7,
+            dashArray: '6, 10'
+        }).addTo(map);
+
+        // Setas de direção vermelhas
+        const decorator = L.polylineDecorator(linha, {
+            patterns: [
+                {
+                    offset: 25,
+                    repeat: 150,
+                    symbol: L.Symbol.arrowHead({
+                        pixelSize: 16,
+                        polygon: true,
+                        pathOptions: {
+                            color: '#ff0000',
+                            fillOpacity: 1,
+                            weight: 1,
+                            opacity: 0.9
+                        }
+                    })
+                }
+            ]
+        }).addTo(map);
+
+        return () => {
+            map.removeLayer(linha);
+            map.removeLayer(decorator);
+        };
+    }, [map, pontos]);
+
+    return null;
+}
+
+//para que as viagens não fiquem sempre visíveis
+function MapaClickReset({ setViagemSelecionada, setMotoristaSelecionado }) {
+    useMapEvent('click', () => {
+        // Quando o usuário clicar em qualquer parte do mapa (não em markers)
+        setViagemSelecionada(null);
+        setMotoristaSelecionado(null);
+    });
+
+    return null;
+}
 
 //o mapa percurso oferece uma visualização por veiculo, util para atualizar em tempo real
 //é usado na tela inicial para servir apenas como monitoramento
@@ -48,6 +169,7 @@ export default function MapaPercurso({
     const [viagemSelecionada, setVIagemSelecionada] = useState(null);
     //para a tela de loading ser mostrada enquanto os dados são carregados
     const [carregando, setCarregando] = useState(false);
+    const [alertas, setAlertas] = useState([]);
 
     // const centralizarProximoMotorista = useRef(true); //para a logica de centralização, impede que o mapa centralize o percurso ao selecionar no mapa em vez da lista
 
@@ -62,6 +184,16 @@ export default function MapaPercurso({
             console.log(err);
             alert('Erro ao resgatar ou desenhar cercas');
             setCarregando(false);
+        }
+    }
+
+    async function resgatarAlertas() {
+        try {
+            const resposta = await api.get('/alertas');
+            setAlertas(resposta.data);
+        } catch (err) {
+            console.log('Erro ao resgatar alertas: ', err);
+            alert('Erro ao resgatar alertas');
         }
     }
 
@@ -114,6 +246,7 @@ export default function MapaPercurso({
     useEffect(() => {
         resgatarCercas();
         resgatarVeiculosRegistro();
+        resgatarAlertas(); // Adicione esta linha
     }, [])
 
     function formatarDataHora(isoString) {
@@ -156,15 +289,30 @@ export default function MapaPercurso({
                             key={cerca.id}
                             positions={coordenadas}
                             pathOptions={{ color: cerca.cor }}
+                            eventHandlers={{
+                                click: () => {
+                                    setVIagemSelecionada(null);
+                                    setMotoristaSelecionado(null);
+                                    console.log(cerca);
+                                }
+                            }}
                         >
                             <Popup>
                                 Cerca: <strong>{cerca.nome}</strong><br />
                                 <b>Camada:</b> {cerca.camada.nome} <br />
                                 <b>Tipo:</b> {cerca.tipo}<br />
+                                <b>Limite normal:</b> {cerca.velocidade_max}<br />
+                                <b>Limie chuva:</b> {cerca.velocidade_chuva}<br />
+
                             </Popup>
                         </Polygon>
                     );
                 })}
+
+                <MapaClickReset
+                    setViagemSelecionada={setVIagemSelecionada}
+                    setMotoristaSelecionado={setMotoristaSelecionado}
+                />
 
                 {/* para desenhar os marcadores dos veiculos no mapa */}
                 {viagens && Array.isArray(viagens) ? viagens.map((veiculo) => {
@@ -174,17 +322,7 @@ export default function MapaPercurso({
                     const ultimoPonto = viagem.registros[viagem.registros.length - 1];
 
                     const dataObj = new Date(ultimoPonto.timestamp);
-                    // const dataFormatada = dataObj.toLocaleDateString("pt-BR", {
-                    //     // timeZone: "America/Sao_Paulo",
-                    //     day: "2-digit",
-                    //     month: "2-digit",
-                    //     year: "numeric",
-                    // });
-                    // const horaFormatada = dataObj.toLocaleTimeString("pt-BR", {
-                    //     // timeZone: "America/Sao_Paulo",
-                    //     hour: "2-digit",
-                    //     minute: "2-digit",
-                    // });
+
                     // const ultimoHorario = `${horaFormatada}, ${dataFormatada}`;
                     const ultimoHorario = formatarDataHora(ultimoPonto.timestamp);
                     const position = [parseFloat(ultimoPonto.latitude), parseFloat(ultimoPonto.longitude)];
@@ -223,17 +361,67 @@ export default function MapaPercurso({
                     );
                 }) : null}
 
-                {/* se um veiculo for selecionado, será desenhado também o percurso */}
                 {viagemSelecionada && (() => {
                     const veiculoComViagem = viagens.find(v => v.viagem.id === viagemSelecionada);
                     if (!veiculoComViagem) return null;
 
-                    const pontos = veiculoComViagem.viagem.registros.map(p =>
-                        [parseFloat(p.latitude), parseFloat(p.longitude)]
-                    );
+                    const pontos = veiculoComViagem.viagem.registros.filter(p => p.latitude && p.longitude);
 
                     return (
-                        <Polyline positions={pontos} color="blue" />
+                        <>
+                            {pontos.map((ponto, index) => {
+                                const position = [parseFloat(ponto.latitude), parseFloat(ponto.longitude)];
+                                const horario = formatarDataHora(ponto.timestamp);
+
+                                // Lógica simples: verifica se a velocidade ultrapassou o limite
+                                const velocidade = parseFloat(ponto.velocidade) || 0;
+                                const limite = parseFloat(ponto.limite_aplicado) || 0;
+                                const pontoTemAlerta = velocidade > limite;
+
+                                // Define o ícone baseado na verificação de velocidade
+                                const iconToUse = pontoTemAlerta
+                                    ? L.icon({
+                                        iconUrl: alertaIcon,
+                                        iconSize: [30, 30],
+                                        iconAnchor: [15, 15],
+                                        className: 'iconeAlerta'
+                                    })
+                                    : (index === 0 ? starPercursotIcon : pontoPercursoIcon);
+
+                                return (
+                                    <Marker key={ponto.id} position={position} icon={iconToUse}>
+                                        <Popup>
+                                            <div>
+                                                {pontoTemAlerta && (
+                                                    <>
+                                                        <b style={{ color: 'red' }}>EXCESSO DE VELOCIDADE</b><br />
+                                                        <b>Velocidade:</b> {velocidade} km/h<br />
+                                                        <b>Limite:</b> {limite} km/h<br />
+                                                        <b>Diferença:</b> +{(velocidade - limite).toFixed(1)} km/h<br />
+                                                    </>
+                                                )}
+                                                {index === 0 && !pontoTemAlerta && (
+                                                    <>
+                                                        <b style={{ color: 'green' }}>📍 INÍCIO DO PERCURSO</b><br />
+                                                    </>
+                                                )}
+                                                {!pontoTemAlerta && index !== 0 && (
+                                                    <>
+                                                        <b>Velocidade:</b> {velocidade} km/h<br />
+                                                        <b>Limite:</b> {limite} km/h<br />
+                                                    </>
+                                                )}
+                                                <b>Horário:</b> {horario}<br />
+                                                {ponto.chuva ? '🌧️ Chuva detectada' : '☀️ Tempo seco'}
+                                            </div>
+                                        </Popup>
+                                    </Marker>
+                                );
+                            })}
+
+                            {/* Linha com setas indicando direção */}
+                            <LinhaComSetas pontos={pontos} />
+                        </>
                     );
                 })()}
 
