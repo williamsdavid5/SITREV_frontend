@@ -1,8 +1,0 @@
-{
-    "rewrites": [
-        {
-            "source": "/SITREV_frontend/(.*)",
-            "destination": "/$1"
-        }
-    ]
-}
