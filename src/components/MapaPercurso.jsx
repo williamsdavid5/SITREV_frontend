@@ -171,6 +171,8 @@ export default function MapaPercurso({
     const [carregando, setCarregando] = useState(false);
     const [alertas, setAlertas] = useState([]);
 
+    const [mostrarCercas, setMostrarCercas] = useState(true);
+
     // const centralizarProximoMotorista = useRef(true); //para a logica de centralização, impede que o mapa centralize o percurso ao selecionar no mapa em vez da lista
 
     // para resgatar cercas obviamente
@@ -281,7 +283,7 @@ export default function MapaPercurso({
                 )}
 
                 {/* desenha as cercas */}
-                {cercas.map((cerca) => {
+                {mostrarCercas && cercas.map((cerca) => {
                     const coordenadas = cerca.coordenadas.map(coord => [parseFloat(coord[0]), parseFloat(coord[1])]);
 
                     return (
@@ -303,7 +305,6 @@ export default function MapaPercurso({
                                 <b>Tipo:</b> {cerca.tipo}<br />
                                 <b>Limite normal:</b> {cerca.velocidade_max}<br />
                                 <b>Limie chuva:</b> {cerca.velocidade_chuva}<br />
-
                             </Popup>
                         </Polygon>
                     );
@@ -427,22 +428,35 @@ export default function MapaPercurso({
 
             </MapContainer>
 
-            {/* select do provider */}
-            <select
-                name="providerSelect"
-                id="providerSelect"
-                value={currentProvider}
-                onChange={(e) => setCurrentProvider(e.target.value)}
-                className="map-provider-select"
-            >
-                {Object.entries(mapProviders)
-                    .filter(([id]) => id !== 'default')
-                    .map(([id, provider]) => (
-                        <option key={id} value={id}>
-                            {provider.name}
-                        </option>
-                    ))}
-            </select>
+            <div className='janelaProviders'>
+                {/* select do provider */}
+                <p className='pJanelaProviders'>Estilo de mapa:</p>
+                <select
+                    name="providerSelect"
+                    id="providerSelect"
+                    value={currentProvider}
+                    onChange={(e) => setCurrentProvider(e.target.value)}
+                    className="map-provider-select"
+                >
+                    {Object.entries(mapProviders)
+                        .filter(([id]) => id !== 'default')
+                        .map(([id, provider]) => (
+                            <option key={id} value={id}>
+                                {provider.name}
+                            </option>
+                        ))}
+                </select>
+                <div className='divCheckJanelaProviders'>
+                    <input
+                        type="checkbox"
+                        id='checkVerCercas'
+                        checked={mostrarCercas}
+                        onChange={(e) => setMostrarCercas(e.target.checked)}
+                    />
+                    <p className='pJanelaProviders'>Ver cercas</p>
+                </div>
+            </div>
+
 
             {carregando && (
                 <div className='divCarregando'>

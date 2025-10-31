@@ -453,22 +453,25 @@ export default function Mapa({ cercas, cercaSelecionada, setCercaSelecionada }) 
                 />
             )}
 
-            <select
-                name="providerSelect"
-                id="providerSelect"
-                value={currentProvider}
-                onChange={(e) => setCurrentProvider(e.target.value)}
-                className="map-provider-select"
-            >
-                {Object.entries(mapProviders)
-                    .filter(([id]) => id !== 'default')
-                    .map(([id, provider]) => (
-                        <option key={id} value={id}>
-                            {provider.name}
-                        </option>
-                    ))}
-
-            </select>
+            <div className='janelaProviders'>
+                {/* select do provider */}
+                <p className='pJanelaProviders'>Estilo de mapa:</p>
+                <select
+                    name="providerSelect"
+                    id="providerSelect"
+                    value={currentProvider}
+                    onChange={(e) => setCurrentProvider(e.target.value)}
+                    className="map-provider-select"
+                >
+                    {Object.entries(mapProviders)
+                        .filter(([id]) => id !== 'default')
+                        .map(([id, provider]) => (
+                            <option key={id} value={id}>
+                                {provider.name}
+                            </option>
+                        ))}
+                </select>
+            </div>
 
         </div>
     );

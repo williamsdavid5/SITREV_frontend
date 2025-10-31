@@ -258,21 +258,27 @@ export default function MapaPercursoSelecionado({ viagemId, carregandoRegistros,
 
             </MapContainer>
 
-            <select
-                name="providerSelect"
-                id="providerSelect"
-                value={provider}
-                onChange={(e) => setProvider(e.target.value)}
-                className="map-provider-select"
-            >
-                {Object.entries(mapProviders)
-                    .filter(([id]) => id !== 'default')
-                    .map(([id, provider]) => (
-                        <option key={id} value={id}>
-                            {provider.name}
-                        </option>
-                    ))}
-            </select>
+
+
+            <div className='janelaProviders'>
+                {/* select do provider */}
+                <p className='pJanelaProviders'>Estilo de mapa:</p>
+                <select
+                    name="providerSelect"
+                    id="providerSelect"
+                    value={provider}
+                    onChange={(e) => setProvider(e.target.value)}
+                    className="map-provider-select"
+                >
+                    {Object.entries(mapProviders)
+                        .filter(([id]) => id !== 'default')
+                        .map(([id, provider]) => (
+                            <option key={id} value={id}>
+                                {provider.name}
+                            </option>
+                        ))}
+                </select>
+            </div>
 
             {carregandoRegistros && (
                 <div className='divCarregando'>

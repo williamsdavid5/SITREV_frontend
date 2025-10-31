@@ -25,14 +25,24 @@
     height: 40px;
     line-height: 30px;
     /* border: 1px solid var(--destaque2); */
-    border: none;
+    /* border: none; */
+
+    /* border: solid 1px rgb(0, 95, 48); */
+    /* box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.4); */
 }
 
 .leaflet-bar a,
 .leaflet-control-layers-toggle {
     background-color: var(--fundo);
+    /* background-color: black; */
+    /* color: white; */
     box-shadow: none;
 }
+
+/* .leaflet-control-zoom .leaflet-bar .leaflet-control {
+    border: solid 1.5px black;
+    box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.4);
+} */
 
 .leaflet-bar a:hover {
     background-color: var(--auxiliar);
@@ -74,17 +84,49 @@
     fill: #ffffff !important;
 }
 
-#providerSelect {
+.pJanelaProviders {
+    /* margin: 4px 0px; */
+}
+
+.janelaProviders {
+    padding: 10px 10px;
+    background: var(--fundo);
     position: absolute;
     z-index: 1000;
     right: 20px;
     top: 60px;
-    /* border: 2px solid var(--fundo); */
-    background-color: var(--fundo);
-    /* color: var(--fundo); */
-    padding: 5px;
-    border-radius: 4px;
     box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.4);
+    /* border: solid 2px black; */
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+}
+
+#checkVerCercas {
+    width: 15px;
+}
+
+.divCheckJanelaProviders {
+    display: flex;
+    /* margin: 3px 0px; */
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+#providerSelect {
+    /* border: 2px solid var(--fundo); */
+    /* background-color: var(--fundo); */
+    background-color: black;
+    color: white;
+    border-radius: 8px;
+    /* border: solid 1.5px black; */
+    /* box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.4); */
+    /* color: var(--fundo); */
+    padding: 5px 10px;
+    margin: 5px 0px;
+    /* border-radius: 4px; */
 }
 
 .leaflet-edit-marker-selected {
@@ -116,6 +158,7 @@
     padding: 10px;
 
     box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.4);
+    /* border: solid 2px black; */
 }
 
 .divCarregando img {
