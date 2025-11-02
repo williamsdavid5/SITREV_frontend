@@ -22,7 +22,7 @@ p {
         margin-top: 0;
     }
 
-    #providerSelect {
+    .janelaProviders {
         top: 20px;
         right: 20px
     }

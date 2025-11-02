@@ -9,6 +9,7 @@ export default function MenuSuperior() {
             <nav className="menuSuperior">
                 <NavLink to={'/'} end className={"link"}>Início</NavLink>
                 <NavLink to={'/cercas'} end className={"link"}>Cercas</NavLink>
+                <NavLink to={'/veiculos'} end className={"link"}>Veículos</NavLink>
                 <NavLink to={'/motoristas'} end className={"link"}>Motoristas</NavLink>
                 <NavLink to={'/registros'} className={"link"}>Registros</NavLink>
                 <NavLink to={'/alertas'} className={"link"}>Alertas</NavLink>

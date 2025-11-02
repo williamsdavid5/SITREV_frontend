@@ -21,7 +21,10 @@ export default function Motoristas() {
 
     const centralizarProximoMotorista = useRef(true);
 
-    const motoristasFiltrados = motoristas?.filter(motorista => motorista.nome.toLowerCase().includes(pesquisa.toLowerCase()));
+    const motoristasFiltrados = motoristas?.filter(motorista =>
+        motorista.nome.toLowerCase().includes(pesquisa.toLowerCase()) ||
+        (motorista.cartao_rfid && motorista.cartao_rfid.toLowerCase().includes(pesquisa.toLowerCase()))
+    );
 
     async function resgatarMotoristas() {
         try {
@@ -61,7 +64,7 @@ export default function Motoristas() {
                                 type="text"
                                 name=""
                                 id="inputPesquisarMotorista"
-                                placeholder="Pesquisar"
+                                placeholder="Pesquise um nome ou número"
                                 onChange={e => setPesquisa(e.target.value)}
                             />
                         </div>

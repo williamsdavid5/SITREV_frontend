@@ -135,3 +135,8 @@
     border-radius: 5px;
     color: white;
 }
+
+.viagemSelecionada {
+    background-color: black;
+    color: white;
+}

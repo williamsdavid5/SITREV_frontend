@@ -1,7 +1,7 @@
 import './styles/motoristasItemLista.css'
 
-export default function MotoristaitemLista({ motorista, selecionado, aoSelecionar, mostrarPaginaMotoristaIndividual }) {
-    const horario = motorista.ultimaLeitura?.horario;
+export default function VeiculoItemLista({ veiculo, selecionado, aoSelecionar, mostrarPaginaVeiculoIndividual }) {
+    const horario = veiculo.ultimaLeitura?.horario;
 
     function formatarDataHora(leitura) {
         const data = new Date(leitura);
@@ -13,18 +13,16 @@ export default function MotoristaitemLista({ motorista, selecionado, aoSeleciona
         return `${hora}:${minuto} - ${dia}/${mes}/${ano}`;
     }
 
-
     return (
         <div className={`motoristaItemLista ${selecionado ? 'motoristaSelecionadoLista' : ''}`} onClick={aoSelecionar}>
-            <p style={{ width: '100%' }}><b>{motorista.nome}</b></p>
+            <p style={{ width: '100%' }}><b>{veiculo.identificador}</b></p>
             <div className="motoristaItemListaInformacoes">
-                <p><b>Cartão n°: </b> {motorista.cartao_rfid}</p>
-                <p><b>Status atual:</b> {motorista.status}</p>
+                <p><b>Modelo:</b> {veiculo.modelo}</p>
                 <p><b>Ultima leitura:</b> {horario ? formatarDataHora(horario) : 'Sem leitura registrada'}</p>
             </div>
             <button
                 className='botaoVerMaisMotorista'
-                onClick={() => mostrarPaginaMotoristaIndividual(motorista.id)}
+                onClick={() => mostrarPaginaVeiculoIndividual(veiculo.id)}
             >Ver mais</button>
         </div>
     );

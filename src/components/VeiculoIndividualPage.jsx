@@ -4,20 +4,18 @@ import api from '../server/api';
 
 import loadingGif from '../assets/loadingGif.gif';
 import fecharIcon from '../assets/fecharIcon.png'
+import MapaMotoristaIndividual from './MapaMotoristaIndividual';
+import MapaVeiculoIndividual from './MapaVeiculoIndividual';
 
-import MapaMotoristaIndividual from './MapaMotoristaIndividual'; //mapa que mostra apenas um percurso por vez, serve para visualização de historicos
+// import MapaVeiculoIndividual from './MapaVeiculoIndividual'; // Você precisará criar este componente
 
-//página para exibir informações de um motorista especifico
-export default function MotoristaIndividualPage({ motoristaId, setPaginaMotoristaInidividual }) {
+export default function VeiculoIndividualPage({ veiculoId, setPaginaVeiculoIndividual }) {
+    const [veiculo, setVeiculo] = useState();
+    const [carregando, setCarregando] = useState(true);
 
-    const [motorista, setMotorista] = useState(); //motorista a ser exibido
-    const [carregando, setCarregando] = useState(true); //para a tela de loading
-
-    //caso o usuario selecione uma viagem ou alerta na lista ou mapa
     const [viagemSelecionada, setViagemSelecionada] = useState(null);
     const [alertaSelecionado, setAlertaSelecionado] = useState(null);
-
-    const [mostrarTodos, setMostrarTodos] = useState(false); //para mostrar todos os alertas no mapa ao mesmo tempo
+    const [mostrarTodos, setMostrarTodos] = useState(false);
 
     //os filtros para a pesquisa
     const [filtroViagemDia, setFiltroViagemDia] = useState('');
@@ -29,21 +27,18 @@ export default function MotoristaIndividualPage({ motoristaId, setPaginaMotorist
     const [pesquisaViagem, setPesquisaViagem] = useState('');
     const [pesquisaAlerta, setPesquisaAlerta] = useState('');
 
-
-    //a função que se comunica com a API
-    async function resgatarMotorista() {
+    async function resgatarVeiculo() {
         try {
-            let resposta = await api.get(`motoristas/${motoristaId}`);
-            setMotorista(resposta.data);
+            let resposta = await api.get(`veiculos/${veiculoId}`);
+            setVeiculo(resposta.data);
             setCarregando(false);
         } catch (err) {
-            console.log('erro ao resgatar motorista individual ', err);
-            alert('Erro ao resgatar motorista individual');
+            console.log('erro ao resgatar veiculo individual ', err);
+            alert('Erro ao resgatar veiculo individual');
             setCarregando(false);
         }
     }
 
-    //para formatar a data e hora recebida do BD
     function formatarDataHora(isoString) {
         const data = new Date(isoString);
 
@@ -57,15 +52,19 @@ export default function MotoristaIndividualPage({ motoristaId, setPaginaMotorist
         return `${dia}/${mes}/${ano} - ${hora}:${minuto}`;
     }
 
-    // Função para verificar se o texto contém o termo de pesquisa
-    function contemTermo(texto, termo) {
-        return texto.toString().toLowerCase().includes(termo.toLowerCase());
-    }
-
+    // Calcular total de alertas (soma de todos os alertas de todas as viagens)
+    const totalAlertas = veiculo?.viagens?.reduce((total, viagem) => {
+        return total + (viagem.alertas?.length || 0);
+    }, 0) || 0;
 
     useEffect(() => {
-        resgatarMotorista();
+        resgatarVeiculo();
     }, [])
+
+    function contemTermo(texto, termo) {
+        if (!texto) return false;
+        return texto.toString().toLowerCase().includes(termo.toLowerCase());
+    }
 
     if (carregando) {
         return (
@@ -80,13 +79,17 @@ export default function MotoristaIndividualPage({ motoristaId, setPaginaMotorist
                 <div id='motoristaIndividualPageEsquerda'>
                     <p>Todos os registro de:</p>
                     <div className='topoMotoristaIndividual'>
-                        <h2>{motorista.nome}</h2>
-                        <button className='botaoFechar' onClick={() => setPaginaMotoristaInidividual(false)}>
+                        <div>
+                            <h2>{veiculo.identificador}</h2>
+                            <p><b>Modelo: </b>{veiculo.modelo}</p>
+                        </div>
+
+                        <button className='botaoFechar' onClick={() => setPaginaVeiculoIndividual(false)}>
                             <img className='botaofecharImg' src={fecharIcon} alt="" />
                         </button>
                     </div>
                     <div className='motoristaDemaisInformações'>
-                        <p> <b> Viagens: </b> {motorista.viagens.length}</p>
+                        <p> <b> Viagens: </b> {veiculo.viagens.length}</p>
                         <div className='divFiltroMotoristaInidividual'>
                             <input
                                 type="number"
@@ -111,7 +114,7 @@ export default function MotoristaIndividualPage({ motoristaId, setPaginaMotorist
                             onChange={e => setPesquisaViagem(e.target.value)}
                         />
                         <div className='divViagensMotorista'>
-                            {[...motorista.viagens]
+                            {[...veiculo.viagens]
                                 .filter(viagem => {
                                     const data = new Date(viagem.inicio);
                                     const dia = String(data.getUTCDate());
@@ -120,10 +123,9 @@ export default function MotoristaIndividualPage({ motoristaId, setPaginaMotorist
                                     const filtroData = (!filtroViagemDia || Number(dia) === Number(filtroViagemDia)) &&
                                         (!filtroViagemMes || Number(mes) === Number(filtroViagemMes));
 
-                                    // Filtro por pesquisa textual
                                     const filtroTexto = !pesquisaViagem ||
-                                        contemTermo(viagem.veiculo_modelo, pesquisaViagem) ||
-                                        contemTermo(viagem.veiculo_identificador, pesquisaViagem) ||
+                                        contemTermo(viagem.motorista?.nome, pesquisaViagem) ||
+                                        contemTermo(viagem.motorista?.cartao_rfid, pesquisaViagem) ||
                                         contemTermo(formatarDataHora(viagem.inicio), pesquisaViagem) ||
                                         contemTermo(formatarDataHora(viagem.fim), pesquisaViagem);
 
@@ -131,10 +133,7 @@ export default function MotoristaIndividualPage({ motoristaId, setPaginaMotorist
                                 })
                                 .sort((a, b) => new Date(b.inicio) - new Date(a.inicio))
                                 .map(viagem => {
-                                    // Contar quantos alertas estão associados a esta viagem
-                                    const quantidadeAlertas = motorista.alertas.filter(alerta =>
-                                        alerta.viagem_id === viagem.id
-                                    ).length;
+                                    const quantidadeAlertas = viagem.alertas?.length || 0;
 
                                     return (
                                         <div
@@ -142,13 +141,14 @@ export default function MotoristaIndividualPage({ motoristaId, setPaginaMotorist
                                             key={viagem.id}
                                             onClick={() => {
                                                 setViagemSelecionada(viagem);
-                                                const alertaRelacionado = motorista.alertas.find(alerta => alerta.viagem_id === viagem.id);
+                                                const alertaRelacionado = viagem.alertas.find(alerta => alerta.viagem_id === viagem.id);
+
                                                 setAlertaSelecionado(alertaRelacionado || null);
                                             }}
                                         >
                                             <p><b>Início:</b> {formatarDataHora(viagem.inicio)}</p>
-                                            <p><b>Fim:</b> {formatarDataHora(viagem.fim)}</p>
-                                            <p><b>Veículo: </b>{viagem.veiculo_modelo} - {viagem.veiculo_identificador}</p>
+                                            <p><b>Fim:</b> {viagem.fim ? formatarDataHora(viagem.fim) : 'Em andamento'}</p>
+                                            <p><b>Motorista: </b>{viagem.motorista?.nome} - {viagem.motorista?.cartao_rfid}</p>
                                             <p><b>Alertas: </b>{quantidadeAlertas}</p>
                                         </div>
                                     );
@@ -156,7 +156,7 @@ export default function MotoristaIndividualPage({ motoristaId, setPaginaMotorist
                             }
                         </div>
 
-                        <p><b> Alertas: </b> {motorista.alertas.length}</p>
+                        <p><b> Alertas: </b> {totalAlertas}</p>
                         <div className='divFiltroMotoristaInidividual'>
                             <input
                                 type="number"
@@ -181,7 +181,15 @@ export default function MotoristaIndividualPage({ motoristaId, setPaginaMotorist
                             onChange={e => setPesquisaAlerta(e.target.value)}
                         />
                         <div className='divViagensMotorista'>
-                            {[...motorista.alertas]
+                            {veiculo.viagens
+                                .flatMap(viagem =>
+                                    viagem.alertas?.map(alerta => ({
+                                        ...alerta,
+                                        viagem_inicio: viagem.inicio,
+                                        motorista_nome: viagem.motorista?.nome,
+                                        motorista_rfid: viagem.motorista?.cartao_rfid
+                                    })) || []
+                                )
                                 .filter(alerta => {
                                     const data = new Date(alerta.timestamp);
                                     const dia = String(data.getUTCDate());
@@ -190,16 +198,14 @@ export default function MotoristaIndividualPage({ motoristaId, setPaginaMotorist
                                     const filtroData = (!filtroAlertaDia || Number(dia) === Number(filtroAlertaDia)) &&
                                         (!filtroAlertaMes || Number(mes) === Number(filtroAlertaMes));
 
-                                    // Filtro por pesquisa textual
                                     const filtroTexto = !pesquisaAlerta ||
                                         contemTermo(alerta.tipo, pesquisaAlerta) ||
-                                        contemTermo(alerta.veiculo_modelo, pesquisaAlerta) ||
-                                        contemTermo(alerta.veiculo_identificador, pesquisaAlerta) ||
+                                        contemTermo(alerta.motorista_nome, pesquisaAlerta) ||
+                                        contemTermo(alerta.motorista_rfid, pesquisaAlerta) ||
                                         contemTermo(formatarDataHora(alerta.timestamp), pesquisaAlerta);
 
                                     return filtroData && filtroTexto;
                                 })
-
                                 .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
                                 .map(alerta => (
                                     <div
@@ -211,11 +217,12 @@ export default function MotoristaIndividualPage({ motoristaId, setPaginaMotorist
                                         }}
                                     >
                                         <p><b>{alerta.tipo}</b></p>
-                                        <p><b>Início: </b>{formatarDataHora(alerta.timestamp)}</p>
-                                        <p><b>Veículo: </b>{alerta.veiculo_modelo} - {alerta.veiculo_identificador}</p>
+                                        <p><b>Horário: </b>{formatarDataHora(alerta.timestamp)}</p>
+                                        <p><b>Motorista: </b>{alerta.motorista_nome} - {alerta.motorista_rfid}</p>
+                                        <p><b>Descrição: </b>{alerta.descricao}</p>
                                     </div>
-                                ))}
-
+                                ))
+                            }
                         </div>
 
                         <button
@@ -229,12 +236,18 @@ export default function MotoristaIndividualPage({ motoristaId, setPaginaMotorist
                     </div>
                 </div>
                 <div id='motoristaIndividualPageDireita'>
-                    <MapaMotoristaIndividual
-                        motorista={motorista}
+                    {/* Você precisará criar um MapaVeiculoIndividual similar ao MapaMotoristaIndividual
+                    <MapaVeiculoIndividual
+                        veiculo={veiculo}
                         viagemSelecionada={viagemSelecionada}
                         alertaSelecionado={alertaSelecionado}
                         mostrarTodos={mostrarTodos}
                         setMostrarTodos={setMostrarTodos}
+                    /> */}
+                    <MapaVeiculoIndividual
+                        veiculo={veiculo}
+                        viagemSelecionada={viagemSelecionada}
+                        alertaSelecionado={alertaSelecionado}
                     />
                     <div className="divAuxiliarSombra" style={{ width: '70%' }}></div>
                 </div>
