@@ -1,7 +1,8 @@
 import './styles/motoristasItemLista.css'
+import { useEffect } from 'react';
 
 export default function VeiculoItemLista({ veiculo, selecionado, aoSelecionar, mostrarPaginaVeiculoIndividual }) {
-    const horario = veiculo.ultimaLeitura?.horario;
+    const horario = veiculo.ultima_leitura;
 
     function formatarDataHora(leitura) {
         const data = new Date(leitura);
@@ -13,12 +14,17 @@ export default function VeiculoItemLista({ veiculo, selecionado, aoSelecionar, m
         return `${hora}:${minuto} - ${dia}/${mes}/${ano}`;
     }
 
+    // useEffect(() => {
+    //     console.log(veiculo.ultima_leitura);
+    // }, [])
+
     return (
         <div className={`motoristaItemLista ${selecionado ? 'motoristaSelecionadoLista' : ''}`} onClick={aoSelecionar}>
             <p style={{ width: '100%' }}><b>{veiculo.identificador}</b></p>
             <div className="motoristaItemListaInformacoes">
                 <p><b>Modelo:</b> {veiculo.modelo}</p>
                 <p><b>Ultima leitura:</b> {horario ? formatarDataHora(horario) : 'Sem leitura registrada'}</p>
+                <p><b>Ultimo mootorista: </b> {veiculo.motorista.nome}</p>
             </div>
             <button
                 className='botaoVerMaisMotorista'

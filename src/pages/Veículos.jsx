@@ -16,6 +16,7 @@ export default function Veiculos() {
     const [veiculos, setVeiculos] = useState();
     const [pesquisa, setPesquisa] = useState('');
     const centralizarProximoVeiculo = useRef(true);
+    const [motoristaSelecionado, setMotoristaSelecionado] = useState(null);
     const [veiculoSelecionado, setVeiculoSelecionado] = useState(null);
     const [paginaVeiculoIndividual, setPaginaVeiculoInidividual] = useState(false);
     const veiculosFiltrados = veiculos?.filter(veiculo =>
@@ -71,16 +72,20 @@ export default function Veiculos() {
                                     key={veiculo.id}
                                     onClick={() => {
                                         centralizarProximoVeiculo.current = true;
-                                        setVeiculoSelecionado(veiculo.id);
+                                        // Encontra o ID do motorista da última viagem do veículo
+                                        const motoristaID = veiculo.motorista?.id;
+                                        // console.log(veiculo);
+                                        // console.log(motoristaID);
+                                        setMotoristaSelecionado(motoristaID); // Agora envia o ID do motorista
+                                        setVeiculoSelecionado(veiculo.id)
                                     }}
                                     className="itemListaDiv"
                                 >
                                     <VeiculoItemLista
                                         veiculo={veiculo}
-                                        selecionado={veiculoSelecionado === veiculo.id}
+                                        selecionado={veiculoSelecionado === veiculo.id} // Corrige a verificação
                                         mostrarPaginaVeiculoIndividual={mostrarPaginaVeiculoIndividual}
                                     />
-
                                 </div>
                             ))}
                         </div>
@@ -89,8 +94,8 @@ export default function Veiculos() {
 
                     <div className="direitaMotoristas">
                         <MapaPercurso
-                            motoristaSelecionado={veiculoSelecionado}
-                            setMotoristaSelecionado={setVeiculoSelecionado}
+                            motoristaSelecionado={motoristaSelecionado}
+                            setMotoristaSelecionado={setMotoristaSelecionado}
                             mostrarPaginaMotoristaIndividual={mostrarPaginaVeiculoIndividual}
                             centralizarProximoMotorista={centralizarProximoVeiculo}
                         ></MapaPercurso>

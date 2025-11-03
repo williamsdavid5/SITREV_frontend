@@ -173,8 +173,6 @@ export default function MapaPercurso({
 
     const [mostrarCercas, setMostrarCercas] = useState(true);
 
-    // const centralizarProximoMotorista = useRef(true); //para a logica de centralização, impede que o mapa centralize o percurso ao selecionar no mapa em vez da lista
-
     // para resgatar cercas obviamente
     async function resgatarCercas() {
         try {
@@ -295,7 +293,7 @@ export default function MapaPercurso({
                                 click: () => {
                                     setVIagemSelecionada(null);
                                     setMotoristaSelecionado(null);
-                                    console.log(cerca);
+                                    // console.log(cerca);
                                 }
                             }}
                         >
