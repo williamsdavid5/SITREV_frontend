@@ -24,7 +24,7 @@ export default function VeiculoItemLista({ veiculo, selecionado, aoSelecionar, m
             <div className="motoristaItemListaInformacoes">
                 <p><b>Modelo:</b> {veiculo.modelo}</p>
                 <p><b>Ultima leitura:</b> {horario ? formatarDataHora(horario) : 'Sem leitura registrada'}</p>
-                <p><b>Ultimo mootorista: </b> {veiculo.motorista.nome}</p>
+                <p><b>Ultimo motorista: </b> {veiculo.motorista.nome}</p>
             </div>
             <button
                 className='botaoVerMaisMotorista'

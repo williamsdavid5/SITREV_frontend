@@ -159,7 +159,8 @@ export default function Registros() {
                                             }}
                                         >
 
-                                            <p>{formatarDataHora(registro.data_viagem)}</p>
+                                            <p><b>Início: </b>{formatarDataHora(registro.data_viagem)}</p>
+                                            <p><b>Ultimo registro: </b>{formatarDataHora(registro.ultimo_registro)}</p>
                                             <p><b>Motorista: </b> {registro.nome_motorista}</p>
                                             <p><b>Veículo usado: </b>{registro.identificador_veiculo}</p>
                                             <p><b>Modelo veículo: </b>{registro.modelo_veiculo}</p>
