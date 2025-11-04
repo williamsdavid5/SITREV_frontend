@@ -277,6 +277,43 @@ function ControladorDesenho({
     return null;
 };
 
+function abrirNoMaps(lat, lng) {
+    if (!lat || !lng) {
+        console.warn("Coordenadas inválidas para compartilhamento.");
+        return;
+    }
+
+    const url = `https://www.google.com/maps?q=${lat},${lng}`;
+
+    // se estiver em um dispositivo mobile, tenta abrir o app do Maps
+    const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+    const link = isMobile ? `geo:${lat},${lng}?q=${lat},${lng}` : url;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(url)}`;
+
+    window.open(link, "_blank");
+}
+
+async function compartilharLocalizacao(lat, lng) {
+    const url = `https://www.google.com/maps?q=${lat},${lng}`;
+    const mensagem = `Veja minha localização: ${url}`;
+
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: "Minha localização",
+                text: mensagem,
+                url,
+            });
+        } catch (err) {
+            console.error("Erro ao compartilhar:", err);
+        }
+    } else {
+        // fallback: abre WhatsApp
+        const linkWhatsapp = `https://wa.me/?text=${encodeURIComponent(mensagem)}`;
+        window.open(linkWhatsapp, "_blank");
+    }
+}
+
 
 export default function Mapa({ cercas, cercaSelecionada, setCercaSelecionada }) {
 
@@ -391,6 +428,24 @@ export default function Mapa({ cercas, cercaSelecionada, setCercaSelecionada }) 
                                     <b>Motorista:</b> {viagem.motorista.nome}<br />
                                     Última leitura: <b>{ultimoHorario}</b><br />
                                     {/* <button className='botaoPopUpMapa'>Ver mais</button>  */}
+                                    <button
+                                        className='botaoPopUpMapa'
+                                        onClick={() => {
+                                            const [lat, lng] = position;
+                                            compartilharLocalizacao(lat, lng);
+                                        }}
+                                    >
+                                        Compartilhar localização
+                                    </button>
+                                    <button
+                                        className='botaoPopUpMapa'
+                                        onClick={() => {
+                                            const [lat, lng] = position;
+                                            abrirNoMaps(lat, lng);
+                                        }}
+                                    >
+                                        Google Maps
+                                    </button>
                                 </div>
                             </Popup>
                         </Marker>
@@ -425,6 +480,24 @@ export default function Mapa({ cercas, cercaSelecionada, setCercaSelecionada }) 
                                                 <b>Velocidade:</b> {ponto.velocidade} km/h<br />
                                                 <b>Limite aplicado:</b> {ponto.limite_aplicado ?? 0} km/h<br />
                                                 {ponto.chuva ? '🌧️ Chuva detectada' : '☀️ Tempo seco'}
+                                                <button
+                                                    className='botaoPopUpMapa'
+                                                    onClick={() => {
+                                                        const [lat, lng] = position;
+                                                        compartilharLocalizacao(lat, lng);
+                                                    }}
+                                                >
+                                                    Compartilhar localização
+                                                </button>
+                                                <button
+                                                    className='botaoPopUpMapa'
+                                                    onClick={() => {
+                                                        const [lat, lng] = position;
+                                                        abrirNoMaps(lat, lng);
+                                                    }}
+                                                >
+                                                    Google Maps
+                                                </button>
                                             </div>
                                         </Popup>
                                     </Marker>

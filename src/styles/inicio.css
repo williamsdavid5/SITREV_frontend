@@ -12,8 +12,7 @@ p {
 
 @media (max-width: 800px) {
 
-    .menuSuperiorHeader,
-    .botaoPopUpMapa {
+    .menuSuperiorHeader {
         display: none;
     }
 

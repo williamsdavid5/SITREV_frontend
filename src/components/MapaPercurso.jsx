@@ -386,12 +386,12 @@ export default function MapaPercurso({
                                     <b>Veículo: {veiculo.identificador}</b><br />
                                     <b>Motorista:</b> {viagem.motorista.nome}<br />
                                     Última leitura: <b>{ultimoHorario}</b><br />
-                                    <button
+                                    {/* <button
                                         className='botaoPopUpMapa'
                                         onClick={() => mostrarPaginaMotoristaIndividual(viagem.motorista.id)}
                                     >
-                                        Ver mais
-                                    </button>
+                                        Informações do motorista
+                                    </button> */}
                                     <button
                                         className='botaoPopUpMapa'
                                         onClick={() => {
@@ -527,7 +527,7 @@ export default function MapaPercurso({
                         checked={mostrarCercas}
                         onChange={(e) => setMostrarCercas(e.target.checked)}
                     />
-                    <p className='pJanelaProviders'>Ver cercas</p>
+                    <p className='pJanelaProviders'>Exibir cercas</p>
                 </div>
             </div>
 
