@@ -153,6 +153,43 @@ function pontoTemAlerta(registro) {
     return velocidade > limite;
 }
 
+function abrirNoMaps(lat, lng) {
+    if (!lat || !lng) {
+        console.warn("Coordenadas inválidas para compartilhamento.");
+        return;
+    }
+
+    const url = `https://www.google.com/maps?q=${lat},${lng}`;
+
+    // se estiver em um dispositivo mobile, tenta abrir o app do Maps
+    const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+    const link = isMobile ? `geo:${lat},${lng}?q=${lat},${lng}` : url;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(url)}`;
+
+    window.open(link, "_blank");
+}
+
+async function compartilharLocalizacao(lat, lng) {
+    const url = `https://www.google.com/maps?q=${lat},${lng}`;
+    const mensagem = `Veja minha localização: ${url}`;
+
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: "Minha localização",
+                text: mensagem,
+                url,
+            });
+        } catch (err) {
+            console.error("Erro ao compartilhar:", err);
+        }
+    } else {
+        // fallback: abre WhatsApp
+        const linkWhatsapp = `https://wa.me/?text=${encodeURIComponent(mensagem)}`;
+        window.open(linkWhatsapp, "_blank");
+    }
+}
+
 // Função para formatar data e hora
 // Função para formatar data e hora
 function formatarDataHora(isoString) {
@@ -253,10 +290,28 @@ export default function MapaVeiculoIndividual({ veiculo, viagemSelecionada, aler
                     <Marker position={pontos[pontos.length - 1]} icon={vehicleIcon}>
                         <Popup>
                             <b>🚗 VEÍCULO</b><br />
-                            <b>Posição final</b><br />
+                            <b>Registro final em: </b> {formatarDataHora(viagemSelecionada.fim)} <br />
                             <b>Veículo:</b> {veiculo.identificador} - {veiculo.modelo}<br />
                             <b>Motorista:</b> {viagemSelecionada.motorista?.nome}<br />
                             <b>RFID:</b> {viagemSelecionada.motorista?.cartao_rfid}
+                            <button
+                                className='botaoPopUpMapa'
+                                onClick={() => {
+                                    const [lat, lng] = pontos[pontos.length - 1];
+                                    compartilharLocalizacao(lat, lng);
+                                }}
+                            >
+                                Compartilhar localização
+                            </button>
+                            <button
+                                className='botaoPopUpMapa'
+                                onClick={() => {
+                                    const [lat, lng] = pontos[pontos.length - 1];
+                                    abrirNoMaps(lat, lng);
+                                }}
+                            >
+                                Google Maps
+                            </button>
                         </Popup>
                     </Marker>
                 )}
@@ -309,6 +364,24 @@ export default function MapaVeiculoIndividual({ veiculo, viagemSelecionada, aler
                                             )}
                                             <b>Horário:</b> {formatarDataHora(registro.timestamp)}<br />
                                             {registro.chuva ? '🌧️ Chuva detectada' : '☀️ Tempo seco'}
+                                            <button
+                                                className='botaoPopUpMapa'
+                                                onClick={() => {
+                                                    // const [lat, lng] = position;
+                                                    compartilharLocalizacao(lat, lng);
+                                                }}
+                                            >
+                                                Compartilhar localização
+                                            </button>
+                                            <button
+                                                className='botaoPopUpMapa'
+                                                onClick={() => {
+                                                    // const [lat, lng] = position;
+                                                    abrirNoMaps(lat, lng);
+                                                }}
+                                            >
+                                                Google Maps
+                                            </button>
                                         </div>
                                     </Popup>
                                 </Marker>
@@ -339,6 +412,28 @@ export default function MapaVeiculoIndividual({ veiculo, viagemSelecionada, aler
                                     <b>Horário:</b> {formatarDataHora(registro.timestamp)}<br />
                                     <b>Motorista:</b> {alertaSelecionado.motorista?.nome}<br />
                                     {registro.chuva ? '🌧️ Chuva detectada' : '☀️ Tempo seco'}
+                                    <button
+                                        className='botaoPopUpMapa'
+                                        onClick={() => {
+                                            // const [lat, lng] = position;
+                                            const lat = parseFloat(registro.latitude);
+                                            const lng = parseFloat(registro.longitude);
+                                            compartilharLocalizacao(lat, lng);
+                                        }}
+                                    >
+                                        Compartilhar localização
+                                    </button>
+                                    <button
+                                        className='botaoPopUpMapa'
+                                        onClick={() => {
+                                            // const [lat, lng] = position;
+                                            const lat = parseFloat(registro.latitude);
+                                            const lng = parseFloat(registro.longitude);
+                                            abrirNoMaps(lat, lng);
+                                        }}
+                                    >
+                                        Google Maps
+                                    </button>
                                 </Popup>
                             </Marker>
                         ))}

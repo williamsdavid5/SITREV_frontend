@@ -134,26 +134,6 @@ function LinhaComSetasVermelha({ pontos }) {
     return null;
 }
 
-const identificarPontosComAlerta = (viagem) => {
-    if (!viagem?.registros) return new Set();
-
-    const pontosComAlerta = new Set();
-
-    motorista?.alertas?.forEach(alerta => {
-        alerta.registroCoordenadas?.forEach(coord => {
-            viagem.registros.forEach((registro, index) => {
-                if (registro.latitude === coord.latitude &&
-                    registro.longitude === coord.longitude &&
-                    registro.timestamp === coord.timestamp) {
-                    pontosComAlerta.add(index);
-                }
-            });
-        });
-    });
-
-    return pontosComAlerta;
-};
-
 function CentralizarMapa({ coordenadas }) {
     const map = useMap();
 
@@ -164,6 +144,43 @@ function CentralizarMapa({ coordenadas }) {
     }, [coordenadas]);
 
     return null;
+}
+
+function abrirNoMaps(lat, lng) {
+    if (!lat || !lng) {
+        console.warn("Coordenadas inválidas para compartilhamento.");
+        return;
+    }
+
+    const url = `https://www.google.com/maps?q=${lat},${lng}`;
+
+    // se estiver em um dispositivo mobile, tenta abrir o app do Maps
+    const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+    const link = isMobile ? `geo:${lat},${lng}?q=${lat},${lng}` : url;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(url)}`;
+
+    window.open(link, "_blank");
+}
+
+async function compartilharLocalizacao(lat, lng) {
+    const url = `https://www.google.com/maps?q=${lat},${lng}`;
+    const mensagem = `Veja minha localização: ${url}`;
+
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: "Minha localização",
+                text: mensagem,
+                url,
+            });
+        } catch (err) {
+            console.error("Erro ao compartilhar:", err);
+        }
+    } else {
+        // fallback: abre WhatsApp
+        const linkWhatsapp = `https://wa.me/?text=${encodeURIComponent(mensagem)}`;
+        window.open(linkWhatsapp, "_blank");
+    }
 }
 
 export default function MapaMotoristaIndividual({ motorista, viagemSelecionada, alertaSelecionado, setMostrarTodos, mostrarTodos }) {
@@ -237,7 +254,65 @@ export default function MapaMotoristaIndividual({ motorista, viagemSelecionada, 
 
                 {viagemSelecionada && (
                     <Marker position={posicaoAtual} icon={vehicleIcon}>
-                        <Popup>Última posição de {motorista.nome}</Popup>
+                        <Popup>
+                            <div>
+                                <p style={{ margin: '0 0 10px 0', fontSize: '16px', fontWeight: 'bold' }}>
+                                    🚗 {motorista.nome}
+                                </p>
+
+                                <div style={{ marginBottom: '10px' }}>
+                                    <p style={{ margin: '2px 0' }}><b>Veículo:</b> {viagemSelecionada.veiculo_modelo} - {viagemSelecionada.veiculo_identificador}</p>
+                                    <p style={{ margin: '2px 0' }}><b>RFID:</b> {motorista.cartao_rfid}</p>
+                                    {/* <p style={{ margin: '2px 0' }}><b>Status:</b> Viagem em andamento</p> */}
+                                </div>
+
+                                <div style={{ marginBottom: '10px', padding: '8px', backgroundColor: '#f8f9fa', borderRadius: '4px' }}>
+                                    <p style={{ margin: '2px 0', fontSize: '14px' }}><b>Última atualização:</b></p>
+                                    <p style={{ margin: '2px 0', fontSize: '14px' }}>
+                                        {viagemSelecionada.registros?.at(-1)?.timestamp ?
+                                            new Date(viagemSelecionada.registros.at(-1).timestamp).toLocaleString('pt-BR', {
+                                                timeZone: 'UTC',
+                                                day: '2-digit',
+                                                month: '2-digit',
+                                                year: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            }) : 'N/A'}
+                                    </p>
+                                </div>
+
+                                {/* {viagemSelecionada.registros?.at(-1) && (
+                                    <div style={{ marginBottom: '10px' }}>
+                                        <p style={{ margin: '2px 0' }}><b>Velocidade:</b> {parseFloat(viagemSelecionada.registros.at(-1).velocidade || 0).toFixed(1)} km/h</p>
+                                        <p style={{ margin: '2px 0' }}><b>Limite:</b> {parseFloat(viagemSelecionada.registros.at(-1).limite_aplicado || 0).toFixed(1)} km/h</p>
+                                        <p style={{ margin: '2px 0' }}>
+                                            <b>Chuva:</b> {viagemSelecionada.registros.at(-1).chuva ? '🌧️ Detectada' : '☀️ Não detectada'}
+                                        </p>
+                                    </div>
+                                )} */}
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                                    <button
+                                        className='botaoPopUpMapa'
+                                        onClick={() => {
+                                            const [lat, lng] = posicaoAtual;
+                                            compartilharLocalizacao(lat, lng);
+                                        }}
+                                    >
+                                        Compartilhar localização
+                                    </button>
+                                    <button
+                                        className='botaoPopUpMapa'
+                                        onClick={() => {
+                                            const [lat, lng] = posicaoAtual;
+                                            abrirNoMaps(lat, lng);
+                                        }}
+                                    >
+                                        Abrir no Google Maps
+                                    </button>
+                                </div>
+                            </div>
+                        </Popup>
                     </Marker>
                 )}
 
@@ -293,6 +368,24 @@ export default function MapaMotoristaIndividual({ motorista, viagemSelecionada, 
                                                 new Date(registro.timestamp).toLocaleString('pt-BR', {
                                                     timeZone: 'UTC'
                                                 }) : 'N/A'}
+                                            <button
+                                                className='botaoPopUpMapa'
+                                                onClick={() => {
+                                                    // const [lat, lng] = position;
+                                                    compartilharLocalizacao(lat, lng);
+                                                }}
+                                            >
+                                                Compartilhar localização
+                                            </button>
+                                            <button
+                                                className='botaoPopUpMapa'
+                                                onClick={() => {
+                                                    // const [lat, lng] = position;
+                                                    abrirNoMaps(lat, lng);
+                                                }}
+                                            >
+                                                Google Maps
+                                            </button>
                                         </div>
                                     </Popup>
                                 </Marker>
@@ -332,6 +425,28 @@ export default function MapaMotoristaIndividual({ motorista, viagemSelecionada, 
                                             <b>Momento da ocorrência:</b> {new Date(coord.timestamp).toLocaleString('pt-BR', {
                                                 timeZone: 'UTC'
                                             })}
+                                            <button
+                                                className='botaoPopUpMapa'
+                                                onClick={() => {
+                                                    // const [lat, lng] = position;
+                                                    const lat = parseFloat(registro.latitude);
+                                                    const lng = parseFloat(registro.longitude);
+                                                    compartilharLocalizacao(lat, lng);
+                                                }}
+                                            >
+                                                Compartilhar localização
+                                            </button>
+                                            <button
+                                                className='botaoPopUpMapa'
+                                                onClick={() => {
+                                                    // const [lat, lng] = position;
+                                                    const lat = parseFloat(registro.latitude);
+                                                    const lng = parseFloat(registro.longitude);
+                                                    abrirNoMaps(lat, lng);
+                                                }}
+                                            >
+                                                Google Maps
+                                            </button>
                                         </Popup>
                                     </Marker>
                                 ))}

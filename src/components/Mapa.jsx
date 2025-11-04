@@ -390,7 +390,7 @@ export default function Mapa({ cercas, cercaSelecionada, setCercaSelecionada }) 
                                     <b>Veículo: {veiculo.identificador}</b><br />
                                     <b>Motorista:</b> {viagem.motorista.nome}<br />
                                     Última leitura: <b>{ultimoHorario}</b><br />
-                                    <button className='botaoPopUpMapa'>Ver mais</button>
+                                    {/* <button className='botaoPopUpMapa'>Ver mais</button>  */}
                                 </div>
                             </Popup>
                         </Marker>
