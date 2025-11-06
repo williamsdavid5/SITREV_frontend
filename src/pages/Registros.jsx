@@ -79,16 +79,32 @@ export default function Registros() {
         }
     }
 
-    //para a logica de pesquisa
-    async function buscarRegistros(termo) {
-        if (!termo.trim()) {
-            setRegistros([]); // ou resetar para a lista paginada
+    async function buscarRegistros(termo, dataInicio, dataFim) {
+        const temTermo = termo.trim() !== '';
+        const temDatas = dataInicio.dia && dataInicio.mes && dataFim.dia && dataFim.mes;
+
+        if (!temTermo && !temDatas) {
+            setPagina(1);
+            setRegistros([]);
+            resgatarRegistros();
             return;
         }
 
         try {
             setCarregandoLista(true);
-            const resposta = await api.get(`/viagens/buscar?q=${encodeURIComponent(termo)}`);
+
+            const params = new URLSearchParams();
+            if (temTermo) params.append('q', termo);
+
+            if (temDatas) {
+                const anoAtual = new Date().getFullYear();
+                const inicioIso = `${anoAtual}-${dataInicio.mes.padStart(2, '0')}-${dataInicio.dia.padStart(2, '0')}`;
+                const fimIso = `${anoAtual}-${dataFim.mes.padStart(2, '0')}-${dataFim.dia.padStart(2, '0')}`;
+                params.append('dataInicio', inicioIso);
+                params.append('dataFim', fimIso);
+            }
+
+            const resposta = await api.get(`/viagens/buscar?${params.toString()}`);
             setRegistros(resposta.data);
             setTemMais(false);
         } catch (err) {
@@ -97,6 +113,7 @@ export default function Registros() {
             setCarregandoLista(false);
         }
     }
+
 
 
     function formatarDataHora(isoString) {
@@ -111,6 +128,15 @@ export default function Registros() {
 
         return `${dia}/${mes}/${ano} - ${hora}:${minuto}`;
     }
+
+    function gerarDataISO(data) {
+        const dia = parseInt(data.dia);
+        const mes = parseInt(data.mes);
+        const ano = new Date().getFullYear();
+        if (!dia || !mes || mes < 1 || mes > 12 || dia < 1 || dia > 31) return null;
+        return `${ano}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+    }
+
 
     useEffect(() => {
         resgatarRegistros();
@@ -137,9 +163,10 @@ export default function Registros() {
                                 onChange={(e) => {
                                     const valor = e.target.value;
                                     setTermoBusca(valor);
-                                    buscarRegistros(valor);
+                                    buscarRegistros(valor, dataInicio, dataFim);
                                 }}
                             />
+
 
 
                             <p>Pesquisar por período:</p>
@@ -150,14 +177,26 @@ export default function Registros() {
                                         placeholder="DD"
                                         className="inputdata"
                                         value={dataInicio.dia}
-                                        onChange={e => setDataInicio({ ...dataInicio, dia: e.target.value })}
+                                        onChange={e => {
+                                            const novo = { ...dataInicio, dia: e.target.value };
+                                            setDataInicio(novo);
+                                            const inicioISO = gerarDataISO(novo);
+                                            const fimISO = gerarDataISO(dataFim);
+                                            if (inicioISO && fimISO) buscarRegistros(termoBusca, inicioISO, fimISO);
+                                        }}
                                     />
                                     <input
                                         type="number"
                                         placeholder="MM"
                                         className="inputdata"
                                         value={dataInicio.mes}
-                                        onChange={e => setDataInicio({ ...dataInicio, mes: e.target.value })}
+                                        onChange={e => {
+                                            const novo = { ...dataInicio, mes: e.target.value };
+                                            setDataInicio(novo);
+                                            const inicioISO = gerarDataISO(novo);
+                                            const fimISO = gerarDataISO(dataFim);
+                                            if (inicioISO && fimISO) buscarRegistros(termoBusca, inicioISO, fimISO);
+                                        }}
                                     />
                                 </div>
                                 <p>a</p>
@@ -167,17 +206,30 @@ export default function Registros() {
                                         placeholder="DD"
                                         className="inputdata"
                                         value={dataFim.dia}
-                                        onChange={e => setDataFim({ ...dataFim, dia: e.target.value })}
+                                        onChange={e => {
+                                            const novo = { ...dataFim, dia: e.target.value };
+                                            setDataFim(novo);
+                                            const inicioISO = gerarDataISO(dataInicio);
+                                            const fimISO = gerarDataISO(novo);
+                                            if (inicioISO && fimISO) buscarRegistros(termoBusca, inicioISO, fimISO);
+                                        }}
                                     />
                                     <input
                                         type="number"
                                         placeholder="MM"
                                         className="inputdata"
                                         value={dataFim.mes}
-                                        onChange={e => setDataFim({ ...dataFim, mes: e.target.value })}
+                                        onChange={e => {
+                                            const novo = { ...dataFim, mes: e.target.value };
+                                            setDataFim(novo);
+                                            const inicioISO = gerarDataISO(dataInicio);
+                                            const fimISO = gerarDataISO(novo);
+                                            if (inicioISO && fimISO) buscarRegistros(termoBusca, inicioISO, fimISO);
+                                        }}
                                     />
                                 </div>
                             </div>
+
                         </div>
                         <div className="divRegistros">
                             {registros
