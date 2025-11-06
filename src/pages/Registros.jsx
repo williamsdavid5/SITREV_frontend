@@ -5,11 +5,12 @@ import api from "../server/api";
 
 import ModalCarregandoDados from "../components/ModalCarregandoDados";
 import MapaPercursoSelecionado from "../components/MapaPercursoSelecionado";
+import loadingGif from '../assets/loadingGif.gif'
 
 export default function Registros() {
 
     const [registros, setRegistros] = useState([]);
-    const [carregando, setcarregando] = useState(true);
+    const [carregando, setcarregando] = useState(false);
     const [carregandoRegistro, setcarregandoRegistro] = useState(false);
 
     // para a pesquisa entre os registros
@@ -19,6 +20,11 @@ export default function Registros() {
 
     // para a lógica de seleção de viagens na lista lateral
     const [viagemSelecionada, setViagemSelecionada] = useState(null);
+
+    //para a lógica de carregamento aos poucos dos registros
+    const [pagina, setPagina] = useState(1);
+    const [temMais, setTemMais] = useState(true);
+    const [carregandoLista, setCarregandoLista] = useState(false);
 
 
     // para a logica de pesquisar por periodo
@@ -38,26 +44,60 @@ export default function Registros() {
 
     async function resgatarRegistros() {
         try {
-            let resposta = await api.get('/viagens/limpo');
-            console.log(resposta);
+            setCarregandoLista(true);
+            // setcarregando(true);
+            const resposta = await api.get(`/viagens/limpo?page=${pagina}&limit=15`);
+            const novos = resposta.data;
 
-            const ordenados = resposta.data.sort((a, b) => {
+            const ordenados = novos.sort((a, b) => {
                 const dataA = new Date(a.data_viagem);
                 const dataB = new Date(b.data_viagem);
-
                 if (dataA > dataB) return -1;
                 if (dataA < dataB) return 1;
-
                 return b.id - a.id;
             });
 
-            setRegistros(ordenados);
-            setcarregando(false);
+            setRegistros(prev => {
+                const combinados = [...prev, ...ordenados];
+                const unicos = combinados.filter(
+                    (item, index, self) => index === self.findIndex(t => t.id === item.id)
+                );
+                return unicos;
+            });
+
+
+            if (ordenados.length < 15) {
+                setTemMais(false);
+            }
+
         } catch (err) {
-            console.log('Erro ao resgatar registros, ', err);
+            console.error('Erro ao resgatar registros:', err);
             alert('Erro ao resgatar registros');
+        } finally {
+            setCarregandoLista(false);
+            // setcarregando(false);
         }
     }
+
+    //para a logica de pesquisa
+    async function buscarRegistros(termo) {
+        if (!termo.trim()) {
+            setRegistros([]); // ou resetar para a lista paginada
+            return;
+        }
+
+        try {
+            setCarregandoLista(true);
+            const resposta = await api.get(`/viagens/buscar?q=${encodeURIComponent(termo)}`);
+            setRegistros(resposta.data);
+            setTemMais(false);
+        } catch (err) {
+            console.error('Erro ao buscar registros:', err);
+        } finally {
+            setCarregandoLista(false);
+        }
+    }
+
 
     function formatarDataHora(isoString) {
         const data = new Date(isoString);
@@ -74,7 +114,7 @@ export default function Registros() {
 
     useEffect(() => {
         resgatarRegistros();
-    }, [])
+    }, [pagina])
 
     if (carregando) {
         return (
@@ -94,8 +134,13 @@ export default function Registros() {
                                 placeholder="Pesquise qualquer coisa"
                                 className="inputPesquisaQualquerCoisa"
                                 value={termoBusca}
-                                onChange={(e) => setTermoBusca(e.target.value)}
+                                onChange={(e) => {
+                                    const valor = e.target.value;
+                                    setTermoBusca(valor);
+                                    buscarRegistros(valor);
+                                }}
                             />
+
 
                             <p>Pesquisar por período:</p>
                             <div className="pesquisaPorData">
@@ -146,29 +191,50 @@ export default function Registros() {
                                     );
                                     return corresponde && dentroDoIntervalo(registro.data_viagem);
                                 })
+                                .map(registro => (
+                                    <div
+                                        className={`registroItemLista ${viagemSelecionada && viagemSelecionada.id === registro.id ? 'selecionado' : ''
+                                            }`}
+                                        key={registro.id}
+                                        onClick={() => {
+                                            setViagemSelecionada(registro);
+                                            setcarregandoRegistro(true);
+                                        }}
+                                    >
+                                        <p><b>Início: </b>{formatarDataHora(registro.data_viagem)}</p>
+                                        <p><b>Último registro: </b>{formatarDataHora(registro.ultimo_registro)}</p>
+                                        <p><b>Motorista: </b>{registro.nome_motorista}</p>
+                                        <p><b>Veículo usado: </b>{registro.identificador_veiculo}</p>
+                                        <p><b>Modelo veículo: </b>{registro.modelo_veiculo}</p>
+                                        <p><b>Alertas nessa viagem: </b>{registro.quantidade_alertas}</p>
+                                    </div>
+                                ))}
 
-                                .map(registro => {
-                                    return (
-                                        <div
-                                            className={`registroItemLista ${viagemSelecionada && viagemSelecionada.id === registro.id ? 'selecionado' : ''}`}
-                                            key={registro.id}
-                                            onClick={() => {
-                                                setViagemSelecionada(registro);
-                                                setcarregandoRegistro(true);
-                                                // setcarregando(true);
-                                            }}
-                                        >
+                            {/* 🔹 Rodapé com carregamento/paginação */}
+                            <div style={{ textAlign: 'center', padding: '10px' }}>
+                                {carregandoLista && (
+                                    <img
+                                        src={loadingGif}
+                                        alt="Carregando..."
+                                        style={{ width: 40, marginTop: 10 }}
+                                    />
+                                )}
 
-                                            <p><b>Início: </b>{formatarDataHora(registro.data_viagem)}</p>
-                                            <p><b>Ultimo registro: </b>{formatarDataHora(registro.ultimo_registro)}</p>
-                                            <p><b>Motorista: </b> {registro.nome_motorista}</p>
-                                            <p><b>Veículo usado: </b>{registro.identificador_veiculo}</p>
-                                            <p><b>Modelo veículo: </b>{registro.modelo_veiculo}</p>
-                                            <p><b>Alertas nessa viagem: </b>{registro.quantidade_alertas}</p>
-                                        </div>
-                                    )
-                                })}
+                                {!carregandoLista && temMais && (
+                                    <button
+                                        onClick={() => setPagina(p => p + 1)}
+                                        className="botaoCarregarMais"
+                                    >
+                                        Carregar mais
+                                    </button>
+                                )}
+
+                                {!temMais && registros.length > 0 && (
+                                    <p style={{ color: '#888', marginTop: 10 }}>Todos os registros foram carregados ✅</p>
+                                )}
+                            </div>
                         </div>
+
                     </div>
                     <div className="direitaRegistros">
                         <MapaPercursoSelecionado viagemId={viagemSelecionada?.id} carregandoRegistros={carregandoRegistro} setCarregandoRegistros={setcarregandoRegistro} />

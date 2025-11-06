@@ -103,3 +103,21 @@
     width: 80px;
     object-fit: contain;
 }
+
+.botaoCarregarMais {
+    background-color: black;
+    color: white;
+    padding: 5px;
+    border-radius: 50px;
+    width: 80%;
+    border: none;
+    font-weight: bold;
+}
+
+.botaoCarregarMais:hover {
+    /* background-color: var(--auxiliar);
+    color: black;
+    /* border: solid 2px black; */
+    transform: scale(1.05);
+    cursor: pointer;
+}
