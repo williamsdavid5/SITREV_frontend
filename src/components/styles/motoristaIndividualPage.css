@@ -140,3 +140,15 @@
     background-color: black;
     color: white;
 }
+
+.botaoGerarRelatorio {
+    background-color: black;
+    color: white;
+    padding: 0;
+    margin: 5px 0px;
+    height: 30px;
+    width: 130px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}

@@ -12,6 +12,7 @@ import MapaVeiculoIndividual from './MapaVeiculoIndividual';
 export default function VeiculoIndividualPage({ veiculoId, setPaginaVeiculoIndividual }) {
     const [veiculo, setVeiculo] = useState();
     const [carregando, setCarregando] = useState(true);
+    const [carregandoRelatorio, setCarregandoRelatorio] = useState(false);
 
     const [viagemSelecionada, setViagemSelecionada] = useState(null);
     const [alertaSelecionado, setAlertaSelecionado] = useState(null);
@@ -31,6 +32,7 @@ export default function VeiculoIndividualPage({ veiculoId, setPaginaVeiculoIndiv
         try {
             let resposta = await api.get(`veiculos/${veiculoId}`);
             setVeiculo(resposta.data);
+            console.log(resposta.data);
             setCarregando(false);
         } catch (err) {
             console.log('erro ao resgatar veiculo individual ', err);
@@ -38,6 +40,41 @@ export default function VeiculoIndividualPage({ veiculoId, setPaginaVeiculoIndiv
             setCarregando(false);
         }
     }
+
+    // utils/gerarRelatorio.js
+    async function gerarRelatorioVeiculo() {
+        setCarregandoRelatorio(true);
+        try {
+            const id = veiculo?.id; // acessa o ID global
+            if (!id) {
+                alert("ID do veículo não encontrado!");
+                return;
+            }
+
+            const url = `https://telemetria-fvv4.onrender.com/veiculos/relatorio/${id}`;
+
+            // Faz o fetch do PDF
+            const response = await fetch(url);
+            if (!response.ok) throw new Error("Erro ao gerar relatório.");
+
+            // Converte o PDF para blob
+            const blob = await response.blob();
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `relatorio_veiculo_${id}.pdf`;
+            link.click();
+
+            // Limpa o objeto de URL temporário
+            URL.revokeObjectURL(link.href);
+
+        } catch (err) {
+            console.error("Erro ao baixar relatório:", err);
+            alert("Falha ao gerar relatório.");
+        } finally {
+            setCarregandoRelatorio(false);
+        }
+    }
+
 
     function formatarDataHora(isoString) {
         const data = new Date(isoString);
@@ -82,8 +119,13 @@ export default function VeiculoIndividualPage({ veiculoId, setPaginaVeiculoIndiv
                         <div>
                             <h2>{veiculo.identificador}</h2>
                             <p><b>Modelo: </b>{veiculo.modelo}</p>
+                            {carregandoRelatorio ?
+                                (<img src={loadingGif} alt="" style={{ height: '30px' }} />) :
+                                (<button className="botaoGerarRelatorio" onClick={gerarRelatorioVeiculo}>
+                                    Gerar Relatório
+                                </button>)
+                            }
                         </div>
-
                         <button className='botaoFechar' onClick={() => setPaginaVeiculoIndividual(false)}>
                             <img className='botaofecharImg' src={fecharIcon} alt="" />
                         </button>

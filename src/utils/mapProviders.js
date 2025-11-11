@@ -63,7 +63,7 @@ const mapProviders = {
         maxZoom: 19
     },
 
-    default: 'openstreetmap_france'
+    default: 'openstreetmap_hot'
 };
 
 export default mapProviders;
