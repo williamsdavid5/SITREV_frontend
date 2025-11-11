@@ -12,6 +12,7 @@ export default function MotoristaIndividualPage({ motoristaId, setPaginaMotorist
 
     const [motorista, setMotorista] = useState(); //motorista a ser exibido
     const [carregando, setCarregando] = useState(true); //para a tela de loading
+    const [carregandoRelatorio, setCarregandoRelatorio] = useState(false);
 
     //caso o usuario selecione uma viagem ou alerta na lista ou mapa
     const [viagemSelecionada, setViagemSelecionada] = useState(null);
@@ -35,11 +36,45 @@ export default function MotoristaIndividualPage({ motoristaId, setPaginaMotorist
         try {
             let resposta = await api.get(`motoristas/${motoristaId}`);
             setMotorista(resposta.data);
+            console.log(resposta.data);
             setCarregando(false);
         } catch (err) {
             console.log('erro ao resgatar motorista individual ', err);
             alert('Erro ao resgatar motorista individual');
             setCarregando(false);
+        }
+    }
+
+    async function gerarRelatorioMotorista() {
+        setCarregandoRelatorio(true);
+        try {
+            const id = motorista?.id; // acessa o ID global
+            if (!id) {
+                alert("ID do motorista não encontrado!");
+                return;
+            }
+
+            const url = `https://telemetria-fvv4.onrender.com/motoristas/relatorio/${id}`;
+
+            // Faz o fetch do PDF
+            const response = await fetch(url);
+            if (!response.ok) throw new Error("Erro ao gerar relatório.");
+
+            // Converte o PDF para blob
+            const blob = await response.blob();
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `relatorio_veiculo_${id}.pdf`;
+            link.click();
+
+            // Limpa o objeto de URL temporário
+            URL.revokeObjectURL(link.href);
+
+        } catch (err) {
+            console.error("Erro ao baixar relatório:", err);
+            alert("Falha ao gerar relatório.");
+        } finally {
+            setCarregandoRelatorio(false);
         }
     }
 
@@ -80,7 +115,17 @@ export default function MotoristaIndividualPage({ motoristaId, setPaginaMotorist
                 <div id='motoristaIndividualPageEsquerda'>
                     <p>Todos os registro de:</p>
                     <div className='topoMotoristaIndividual'>
-                        <h2>{motorista.nome}</h2>
+                        <div>
+                            <h2>{motorista.nome}</h2>
+                            <p><b>RFID n° </b>{motorista.cartao_rfid}</p>
+                            {carregandoRelatorio ?
+                                (<img src={loadingGif} alt="" style={{ height: '30px' }} />) :
+                                (<button className="botaoGerarRelatorio" onClick={gerarRelatorioMotorista}>
+                                    Gerar Relatório
+                                </button>)
+                            }
+                        </div>
+
                         <button className='botaoFechar' onClick={() => setPaginaMotoristaInidividual(false)}>
                             <img className='botaofecharImg' src={fecharIcon} alt="" />
                         </button>
