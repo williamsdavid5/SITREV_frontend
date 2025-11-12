@@ -44,6 +44,7 @@ export default function VeiculoIndividualPage({ veiculoId, setPaginaVeiculoIndiv
 
 
     async function gerarRelatorioVeiculo() {
+        setCarregandoRelatorio(true);
         try {
             const id = veiculo.id;
 
@@ -84,6 +85,8 @@ export default function VeiculoIndividualPage({ veiculoId, setPaginaVeiculoIndiv
             console.error(error);
             alert('Erro ao gerar relatório.');
         }
+        setCarregandoRelatorio(false);
+        SetMostrarModalGerarRelatorio(false);
     }
 
 
