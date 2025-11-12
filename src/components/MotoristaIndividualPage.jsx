@@ -13,6 +13,7 @@ export default function MotoristaIndividualPage({ motoristaId, setPaginaMotorist
     const [motorista, setMotorista] = useState(); //motorista a ser exibido
     const [carregando, setCarregando] = useState(true); //para a tela de loading
     const [carregandoRelatorio, setCarregandoRelatorio] = useState(false);
+    const [mostrarModalGerarRelatorio, setMostrarModalGerarRelatorio] = useState(false);
 
     //caso o usuario selecione uma viagem ou alerta na lista ou mapa
     const [viagemSelecionada, setViagemSelecionada] = useState(null);
@@ -48,26 +49,44 @@ export default function MotoristaIndividualPage({ motoristaId, setPaginaMotorist
     async function gerarRelatorioMotorista() {
         setCarregandoRelatorio(true);
         try {
-            const id = motorista?.id; // acessa o ID global
+            const id = motorista?.id;
             if (!id) {
                 alert("ID do motorista não encontrado!");
                 return;
             }
 
-            const url = `https://telemetria-fvv4.onrender.com/motoristas/relatorio/${id}`;
+            // 🗓️ Lê os valores dos inputs de data por extenso
+            const dataInicio = document.getElementById('relatorioDataInicio').value;
+            const dataFim = document.getElementById('relatorioDataFim').value;
 
-            // Faz o fetch do PDF
+            // 🔗 Monta os parâmetros de data
+            let params = new URLSearchParams();
+
+            if (dataInicio) {
+                params.append('inicio', dataInicio);
+            }
+            if (dataFim) {
+                params.append('fim', dataFim);
+            }
+
+            // Adiciona o tipo do relatório (resumido/completo)
+            const tipoRelatorio = document.querySelector('input[name="tipoRelatorio"]:checked')?.value || 'completo';
+            params.append('tipo', tipoRelatorio);
+
+            // const url = `https://telemetria-fvv4.onrender.com/motoristas/relatorio/${id}?${params.toString()}`;
+            const url = `http://localhost:3000/motoristas/relatorio/${id}?${params.toString()}`;
+
+            // 🌐 Faz o download do relatório
             const response = await fetch(url);
             if (!response.ok) throw new Error("Erro ao gerar relatório.");
 
-            // Converte o PDF para blob
+            // 📄 Baixa o PDF
             const blob = await response.blob();
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = `relatorio_veiculo_${id}.pdf`;
+            link.download = `relatorio_motorista_${id}.pdf`;
             link.click();
 
-            // Limpa o objeto de URL temporário
             URL.revokeObjectURL(link.href);
 
         } catch (err) {
@@ -75,8 +94,10 @@ export default function MotoristaIndividualPage({ motoristaId, setPaginaMotorist
             alert("Falha ao gerar relatório.");
         } finally {
             setCarregandoRelatorio(false);
+            setMostrarModalGerarRelatorio(false);
         }
     }
+
 
     //para formatar a data e hora recebida do BD
     function formatarDataHora(isoString) {
@@ -118,19 +139,68 @@ export default function MotoristaIndividualPage({ motoristaId, setPaginaMotorist
                         <div>
                             <h2>{motorista.nome}</h2>
                             <p><b>RFID n° </b>{motorista.cartao_rfid}</p>
-                            {carregandoRelatorio ?
-                                (<img src={loadingGif} alt="" style={{ height: '30px' }} />) :
-                                (<button className="botaoGerarRelatorio" onClick={gerarRelatorioMotorista}>
-                                    Gerar Relatório
-                                </button>)
+                            {
+                                !mostrarModalGerarRelatorio && (
+                                    carregandoRelatorio ?
+                                        (<img src={loadingGif} alt="" style={{ height: '30px' }} />) :
+                                        (
+                                            <div>
+                                                <button className="botaoGerarRelatorio" onClick={() => { setMostrarModalGerarRelatorio(!mostrarModalGerarRelatorio) }}>
+                                                    Gerar Relatório
+                                                </button>
+                                            </div>
+                                        )
+                                )
                             }
                         </div>
-
                         <button className='botaoFechar' onClick={() => setPaginaMotoristaInidividual(false)}>
                             <img className='botaofecharImg' src={fecharIcon} alt="" />
                         </button>
                     </div>
                     <div className='motoristaDemaisInformações'>
+
+                        {mostrarModalGerarRelatorio &&
+                            (
+                                <div className='modalGerarRelatorio'>
+                                    <p style={{ width: '100%', textAlign: 'center', fontSize: '14px' }}><b>Gerar Relatório</b></p>
+                                    <label htmlFor="">
+                                        <input type="radio" name="tipoRelatorio" value="resumido" id="" />Resumido <br />
+                                        <input type="radio" name="tipoRelatorio" value="completo" defaultChecked id="" />Completo
+                                    </label>
+                                    <p>Defina limites ou deixe em branco para incluir todos os registros:</p>
+                                    <div className='periodos'>
+                                        <p>De:</p>
+                                        <input
+                                            type="text"
+                                            placeholder="dd/mm/aaaa"
+                                            id="relatorioDataInicio"
+                                            className='inputFiltroMotorista'
+                                        />
+
+                                        <p>até:</p>
+                                        <input
+                                            type="text"
+                                            placeholder="dd/mm/aaaa"
+                                            id="relatorioDataFim"
+                                            className='inputFiltroMotorista'
+                                        />
+                                    </div>
+
+                                    {carregandoRelatorio ?
+                                        <img src={loadingGif} alt="" style={{ height: '30px', objectFit: 'contain', marginTop: '10px' }} /> :
+                                        <button
+                                            className='botaoGerarRelatorio'
+                                            onClick={() => {
+                                                gerarRelatorioMotorista();
+                                            }}
+                                        >
+                                            Gerar Relatório
+                                        </button>
+                                    }
+                                </div>
+                            )
+                        }
+
                         <p> <b> Viagens: </b> {motorista.viagens.length}</p>
                         <div className='divFiltroMotoristaInidividual'>
                             <input
@@ -201,76 +271,80 @@ export default function MotoristaIndividualPage({ motoristaId, setPaginaMotorist
                             }
                         </div>
 
-                        <p><b> Alertas: </b> {motorista.alertas.length}</p>
-                        <div className='divFiltroMotoristaInidividual'>
-                            <input
-                                type="number"
-                                placeholder='Dia'
-                                className='inputFiltroMotorista'
-                                value={filtroAlertaDia}
-                                onChange={e => setFiltroAlertaDia(e.target.value)}
-                            />
-                            <input
-                                type="number"
-                                placeholder='Mês'
-                                className='inputFiltroMotorista'
-                                value={filtroAlertaMes}
-                                onChange={e => setFiltroAlertaMes(e.target.value)}
-                            />
-                        </div>
-                        <input
-                            type="text"
-                            placeholder='Pesquise qualquer coisa'
-                            className='inputPesquisaMotoristaIndividual'
-                            value={pesquisaAlerta}
-                            onChange={e => setPesquisaAlerta(e.target.value)}
-                        />
-                        <div className='divViagensMotorista'>
-                            {[...motorista.alertas]
-                                .filter(alerta => {
-                                    const data = new Date(alerta.timestamp);
-                                    const dia = String(data.getUTCDate());
-                                    const mes = String(data.getUTCMonth() + 1);
+                        {!mostrarModalGerarRelatorio && (
+                            <>
+                                <p><b> Alertas: </b> {motorista.alertas.length}</p>
+                                <div className='divFiltroMotoristaInidividual'>
+                                    <input
+                                        type="number"
+                                        placeholder='Dia'
+                                        className='inputFiltroMotorista'
+                                        value={filtroAlertaDia}
+                                        onChange={e => setFiltroAlertaDia(e.target.value)}
+                                    />
+                                    <input
+                                        type="number"
+                                        placeholder='Mês'
+                                        className='inputFiltroMotorista'
+                                        value={filtroAlertaMes}
+                                        onChange={e => setFiltroAlertaMes(e.target.value)}
+                                    />
+                                </div>
+                                <input
+                                    type="text"
+                                    placeholder='Pesquise qualquer coisa'
+                                    className='inputPesquisaMotoristaIndividual'
+                                    value={pesquisaAlerta}
+                                    onChange={e => setPesquisaAlerta(e.target.value)}
+                                />
+                                <div className='divViagensMotorista'>
+                                    {[...motorista.alertas]
+                                        .filter(alerta => {
+                                            const data = new Date(alerta.timestamp);
+                                            const dia = String(data.getUTCDate());
+                                            const mes = String(data.getUTCMonth() + 1);
 
-                                    const filtroData = (!filtroAlertaDia || Number(dia) === Number(filtroAlertaDia)) &&
-                                        (!filtroAlertaMes || Number(mes) === Number(filtroAlertaMes));
+                                            const filtroData = (!filtroAlertaDia || Number(dia) === Number(filtroAlertaDia)) &&
+                                                (!filtroAlertaMes || Number(mes) === Number(filtroAlertaMes));
 
-                                    // Filtro por pesquisa textual
-                                    const filtroTexto = !pesquisaAlerta ||
-                                        contemTermo(alerta.tipo, pesquisaAlerta) ||
-                                        contemTermo(alerta.veiculo_modelo, pesquisaAlerta) ||
-                                        contemTermo(alerta.veiculo_identificador, pesquisaAlerta) ||
-                                        contemTermo(formatarDataHora(alerta.timestamp), pesquisaAlerta);
+                                            // Filtro por pesquisa textual
+                                            const filtroTexto = !pesquisaAlerta ||
+                                                contemTermo(alerta.tipo, pesquisaAlerta) ||
+                                                contemTermo(alerta.veiculo_modelo, pesquisaAlerta) ||
+                                                contemTermo(alerta.veiculo_identificador, pesquisaAlerta) ||
+                                                contemTermo(formatarDataHora(alerta.timestamp), pesquisaAlerta);
 
-                                    return filtroData && filtroTexto;
-                                })
+                                            return filtroData && filtroTexto;
+                                        })
 
-                                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-                                .map(alerta => (
-                                    <div
-                                        className={`viagemMotoristaItemLista ${alertaSelecionado?.id === alerta.id ? 'viagemSelecionada' : ''}`}
-                                        key={alerta.id}
-                                        onClick={() => {
-                                            setAlertaSelecionado(alerta);
-                                            setViagemSelecionada(null);
-                                        }}
-                                    >
-                                        <p><b>{alerta.tipo}</b></p>
-                                        <p><b>Início: </b>{formatarDataHora(alerta.timestamp)}</p>
-                                        <p><b>Veículo: </b>{alerta.veiculo_modelo} - {alerta.veiculo_identificador}</p>
-                                    </div>
-                                ))}
+                                        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                                        .map(alerta => (
+                                            <div
+                                                className={`viagemMotoristaItemLista ${alertaSelecionado?.id === alerta.id ? 'viagemSelecionada' : ''}`}
+                                                key={alerta.id}
+                                                onClick={() => {
+                                                    setAlertaSelecionado(alerta);
+                                                    setViagemSelecionada(null);
+                                                }}
+                                            >
+                                                <p><b>{alerta.tipo}</b></p>
+                                                <p><b>Início: </b>{formatarDataHora(alerta.timestamp)}</p>
+                                                <p><b>Veículo: </b>{alerta.veiculo_modelo} - {alerta.veiculo_identificador}</p>
+                                            </div>
+                                        ))}
 
-                        </div>
+                                </div>
 
-                        <button
-                            className='botaoMostrarTodosOsAlertas'
-                            onClick={() => {
-                                setMostrarTodos(!mostrarTodos);
-                            }}
-                        >
-                            {mostrarTodos ? 'Ocultar todos os alertas' : 'Mostrar todos os alertas'}
-                        </button>
+                                <button
+                                    className='botaoMostrarTodosOsAlertas'
+                                    onClick={() => {
+                                        setMostrarTodos(!mostrarTodos);
+                                    }}
+                                >
+                                    {mostrarTodos ? 'Ocultar todos os alertas' : 'Mostrar todos os alertas'}
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
                 <div id='motoristaIndividualPageDireita'>
