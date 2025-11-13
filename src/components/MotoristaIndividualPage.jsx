@@ -21,11 +21,16 @@ export default function MotoristaIndividualPage({ motoristaId, setPaginaMotorist
 
     const [mostrarTodos, setMostrarTodos] = useState(false); //para mostrar todos os alertas no mapa ao mesmo tempo
 
-    //os filtros para a pesquisa
-    const [filtroViagemDia, setFiltroViagemDia] = useState('');
-    const [filtroViagemMes, setFiltroViagemMes] = useState('');
-    const [filtroAlertaDia, setFiltroAlertaDia] = useState('');
-    const [filtroAlertaMes, setFiltroAlertaMes] = useState('');
+    // //os filtros para a pesquisa
+    // const [filtroViagemDia, setFiltroViagemDia] = useState('');
+    // const [filtroViagemMes, setFiltroViagemMes] = useState('');
+    // const [filtroAlertaDia, setFiltroAlertaDia] = useState('');
+    // const [filtroAlertaMes, setFiltroAlertaMes] = useState('');
+
+    const [dataInicioViagem, setDataInicioViagem] = useState('');
+    const [dataFimViagem, setDataFimViagem] = useState('');
+    const [dataInicioAlerta, setDataInicioAlerta] = useState('');
+    const [dataFimAlerta, setDataFimAlerta] = useState('');
 
     // Estados para pesquisa textual
     const [pesquisaViagem, setPesquisaViagem] = useState('');
@@ -113,6 +118,21 @@ export default function MotoristaIndividualPage({ motoristaId, setPaginaMotorist
         return `${dia}/${mes}/${ano} - ${hora}:${minuto}`;
     }
 
+    function dentroDoIntervalo(dataIso, dataInicio, dataFim) {
+        if (!dataInicio || !dataFim) return true;
+
+        const data = new Date(dataIso);
+        const dataAlerta = data.getTime();
+
+        const [diaInicio, mesInicio, anoInicio] = dataInicio.split('/').map(Number);
+        const [diaFim, mesFim, anoFim] = dataFim.split('/').map(Number);
+
+        const dataInicioObj = new Date(anoInicio, mesInicio - 1, diaInicio, 0, 0, 0);
+        const dataFimObj = new Date(anoFim, mesFim - 1, diaFim, 23, 59, 59);
+
+        return dataAlerta >= dataInicioObj.getTime() && dataAlerta <= dataFimObj.getTime();
+    }
+
     // Função para verificar se o texto contém o termo de pesquisa
     function contemTermo(texto, termo) {
         return texto.toString().toLowerCase().includes(termo.toLowerCase());
@@ -197,27 +217,12 @@ export default function MotoristaIndividualPage({ motoristaId, setPaginaMotorist
                                             Gerar Relatório
                                         </button>
                                     }
+                                    <button onClick={() => setMostrarModalGerarRelatorio(false)} className='botaoGerarRelatorioCancelar'>Cancelar</button>
                                 </div>
                             )
                         }
 
                         <p> <b> Viagens: </b> {motorista.viagens.length}</p>
-                        <div className='divFiltroMotoristaInidividual'>
-                            <input
-                                type="number"
-                                placeholder='Dia'
-                                className='inputFiltroMotorista'
-                                value={filtroViagemDia}
-                                onChange={e => setFiltroViagemDia(e.target.value)}
-                            />
-                            <input
-                                type="number"
-                                placeholder='Mês'
-                                className='inputFiltroMotorista'
-                                value={filtroViagemMes}
-                                onChange={e => setFiltroViagemMes(e.target.value)}
-                            />
-                        </div>
                         <input
                             type="text"
                             placeholder='Pesquise qualquer coisa'
@@ -225,17 +230,51 @@ export default function MotoristaIndividualPage({ motoristaId, setPaginaMotorist
                             value={pesquisaViagem}
                             onChange={e => setPesquisaViagem(e.target.value)}
                         />
+                        <p>Pesquise por período:</p>
+                        <div className='divFiltroMotoristaInidividual'>
+                            <input
+                                type="text"
+                                placeholder='dd/mm/aaaa'
+                                className='inputFiltroMotorista'
+                                value={dataInicioViagem}
+                                onChange={e => {
+                                    const valor = e.target.value;
+                                    let valorFormatado = valor.replace(/\D/g, '');
+                                    if (valorFormatado.length > 2) {
+                                        valorFormatado = valorFormatado.substring(0, 2) + '/' + valorFormatado.substring(2);
+                                    }
+                                    if (valorFormatado.length > 5) {
+                                        valorFormatado = valorFormatado.substring(0, 5) + '/' + valorFormatado.substring(5, 9);
+                                    }
+                                    setDataInicioViagem(valorFormatado);
+                                }}
+                                maxLength={10}
+                            />
+                            <p>até</p>
+                            <input
+                                type="text"
+                                placeholder='dd/mm/aaaa'
+                                className='inputFiltroMotorista'
+                                value={dataFimViagem}
+                                onChange={e => {
+                                    const valor = e.target.value;
+                                    let valorFormatado = valor.replace(/\D/g, '');
+                                    if (valorFormatado.length > 2) {
+                                        valorFormatado = valorFormatado.substring(0, 2) + '/' + valorFormatado.substring(2);
+                                    }
+                                    if (valorFormatado.length > 5) {
+                                        valorFormatado = valorFormatado.substring(0, 5) + '/' + valorFormatado.substring(5, 9);
+                                    }
+                                    setDataFimViagem(valorFormatado);
+                                }}
+                                maxLength={10}
+                            />
+                        </div>
                         <div className='divViagensMotorista'>
                             {[...motorista.viagens]
                                 .filter(viagem => {
-                                    const data = new Date(viagem.inicio);
-                                    const dia = String(data.getUTCDate());
-                                    const mes = String(data.getUTCMonth() + 1);
+                                    const filtroData = dentroDoIntervalo(viagem.inicio, dataInicioViagem, dataFimViagem);
 
-                                    const filtroData = (!filtroViagemDia || Number(dia) === Number(filtroViagemDia)) &&
-                                        (!filtroViagemMes || Number(mes) === Number(filtroViagemMes));
-
-                                    // Filtro por pesquisa textual
                                     const filtroTexto = !pesquisaViagem ||
                                         contemTermo(viagem.veiculo_modelo, pesquisaViagem) ||
                                         contemTermo(viagem.veiculo_identificador, pesquisaViagem) ||
@@ -274,22 +313,6 @@ export default function MotoristaIndividualPage({ motoristaId, setPaginaMotorist
                         {!mostrarModalGerarRelatorio && (
                             <>
                                 <p><b> Alertas: </b> {motorista.alertas.length}</p>
-                                <div className='divFiltroMotoristaInidividual'>
-                                    <input
-                                        type="number"
-                                        placeholder='Dia'
-                                        className='inputFiltroMotorista'
-                                        value={filtroAlertaDia}
-                                        onChange={e => setFiltroAlertaDia(e.target.value)}
-                                    />
-                                    <input
-                                        type="number"
-                                        placeholder='Mês'
-                                        className='inputFiltroMotorista'
-                                        value={filtroAlertaMes}
-                                        onChange={e => setFiltroAlertaMes(e.target.value)}
-                                    />
-                                </div>
                                 <input
                                     type="text"
                                     placeholder='Pesquise qualquer coisa'
@@ -297,17 +320,51 @@ export default function MotoristaIndividualPage({ motoristaId, setPaginaMotorist
                                     value={pesquisaAlerta}
                                     onChange={e => setPesquisaAlerta(e.target.value)}
                                 />
+                                <p>Pesquise por período:</p>
+                                <div className='divFiltroMotoristaInidividual'>
+                                    <input
+                                        type="text"
+                                        placeholder='dd/mm/aaaa'
+                                        className='inputFiltroMotorista'
+                                        value={dataInicioAlerta}
+                                        onChange={e => {
+                                            const valor = e.target.value;
+                                            let valorFormatado = valor.replace(/\D/g, '');
+                                            if (valorFormatado.length > 2) {
+                                                valorFormatado = valorFormatado.substring(0, 2) + '/' + valorFormatado.substring(2);
+                                            }
+                                            if (valorFormatado.length > 5) {
+                                                valorFormatado = valorFormatado.substring(0, 5) + '/' + valorFormatado.substring(5, 9);
+                                            }
+                                            setDataInicioAlerta(valorFormatado);
+                                        }}
+                                        maxLength={10}
+                                    />
+                                    <p>até</p>
+                                    <input
+                                        type="text"
+                                        placeholder='dd/mm/aaaa'
+                                        className='inputFiltroMotorista'
+                                        value={dataFimAlerta}
+                                        onChange={e => {
+                                            const valor = e.target.value;
+                                            let valorFormatado = valor.replace(/\D/g, '');
+                                            if (valorFormatado.length > 2) {
+                                                valorFormatado = valorFormatado.substring(0, 2) + '/' + valorFormatado.substring(2);
+                                            }
+                                            if (valorFormatado.length > 5) {
+                                                valorFormatado = valorFormatado.substring(0, 5) + '/' + valorFormatado.substring(5, 9);
+                                            }
+                                            setDataFimAlerta(valorFormatado);
+                                        }}
+                                        maxLength={10}
+                                    />
+                                </div>
                                 <div className='divViagensMotorista'>
                                     {[...motorista.alertas]
                                         .filter(alerta => {
-                                            const data = new Date(alerta.timestamp);
-                                            const dia = String(data.getUTCDate());
-                                            const mes = String(data.getUTCMonth() + 1);
+                                            const filtroData = dentroDoIntervalo(alerta.timestamp, dataInicioAlerta, dataFimAlerta);
 
-                                            const filtroData = (!filtroAlertaDia || Number(dia) === Number(filtroAlertaDia)) &&
-                                                (!filtroAlertaMes || Number(mes) === Number(filtroAlertaMes));
-
-                                            // Filtro por pesquisa textual
                                             const filtroTexto = !pesquisaAlerta ||
                                                 contemTermo(alerta.tipo, pesquisaAlerta) ||
                                                 contemTermo(alerta.veiculo_modelo, pesquisaAlerta) ||

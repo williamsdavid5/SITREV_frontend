@@ -19,11 +19,10 @@ export default function VeiculoIndividualPage({ veiculoId, setPaginaVeiculoIndiv
     const [alertaSelecionado, setAlertaSelecionado] = useState(null);
     const [mostrarTodos, setMostrarTodos] = useState(false);
 
-    //os filtros para a pesquisa
-    const [filtroViagemDia, setFiltroViagemDia] = useState('');
-    const [filtroViagemMes, setFiltroViagemMes] = useState('');
-    const [filtroAlertaDia, setFiltroAlertaDia] = useState('');
-    const [filtroAlertaMes, setFiltroAlertaMes] = useState('');
+    // const [filtroViagemDia, setFiltroViagemDia] = useState('');
+    // const [filtroViagemMes, setFiltroViagemMes] = useState('');
+    // const [filtroAlertaDia, setFiltroAlertaDia] = useState('');
+    // const [filtroAlertaMes, setFiltroAlertaMes] = useState('');
 
     const [dataInicioViagem, setDataInicioViagem] = useState('');
     const [dataFimViagem, setDataFimViagem] = useState('');
@@ -109,18 +108,18 @@ export default function VeiculoIndividualPage({ veiculoId, setPaginaVeiculoIndiv
     }
 
 
-    function validarData(data) {
-        if (!data) return false;
-        const regex = /^\d{2}\/\d{2}\/\d{4}$/;
-        if (!regex.test(data)) return false;
+    // function validarData(data) {
+    //     if (!data) return false;
+    //     const regex = /^\d{2}\/\d{2}\/\d{4}$/;
+    //     if (!regex.test(data)) return false;
 
-        const [dia, mes, ano] = data.split('/').map(Number);
-        if (mes < 1 || mes > 12) return false;
-        if (dia < 1 || dia > 31) return false;
+    //     const [dia, mes, ano] = data.split('/').map(Number);
+    //     if (mes < 1 || mes > 12) return false;
+    //     if (dia < 1 || dia > 31) return false;
 
-        const diasNoMes = new Date(ano, mes, 0).getDate();
-        return dia <= diasNoMes;
-    }
+    //     const diasNoMes = new Date(ano, mes, 0).getDate();
+    //     return dia <= diasNoMes;
+    // }
 
     function dentroDoIntervalo(dataIso, dataInicio, dataFim) {
         if (!dataInicio || !dataFim) return true;
@@ -225,6 +224,8 @@ export default function VeiculoIndividualPage({ veiculoId, setPaginaVeiculoIndiv
                                             Gerar Relatório
                                         </button>
                                     }
+
+                                    <button onClick={() => SetMostrarModalGerarRelatorio(false)} className='botaoGerarRelatorioCancelar'>Cancelar</button>
                                 </div>
                             )
                         }

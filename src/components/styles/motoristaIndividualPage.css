@@ -145,7 +145,18 @@
     background-color: black;
     color: white;
     padding: 0;
-    margin: 5px 0px;
+    margin-top: 5px;
+    height: 30px;
+    width: 130px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.botaoGerarRelatorioCancelar {
+    background-color: white;
+    color: black;
+    padding: 0;
     height: 30px;
     width: 130px;
     border: none;
