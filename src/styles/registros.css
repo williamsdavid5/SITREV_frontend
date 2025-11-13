@@ -121,3 +121,7 @@
     transform: scale(1.05);
     cursor: pointer;
 }
+
+.inputdataCompleto {
+    width: 100%;
+}

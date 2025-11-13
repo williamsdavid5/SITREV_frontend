@@ -18,6 +18,9 @@ export default function Registros() {
     const [dataInicio, setDataInicio] = useState({ dia: '', mes: '' });
     const [dataFim, setDataFim] = useState({ dia: '', mes: '' });
 
+    const [dataInicioCompleta, setDataInicioCompleta] = useState('');
+    const [dataFimCompleta, setDataFimCompleta] = useState('');
+
     // para a lógica de seleção de viagens na lista lateral
     const [viagemSelecionada, setViagemSelecionada] = useState(null);
 
@@ -40,6 +43,74 @@ export default function Registros() {
         const dataFimNum = parseInt(dataFim.mes) * 100 + parseInt(dataFim.dia);
 
         return dataAlerta >= dataInicioNum && dataAlerta <= dataFimNum;
+    }
+
+    function dentroDoIntervaloCompleto(dataIso) {
+        if (!dataInicioCompleta || !dataFimCompleta) return true;
+
+        const data = new Date(dataIso);
+        const dataAlerta = data.getTime(); // timestamp em milissegundos
+
+        const [diaInicio, mesInicio, anoInicio] = dataInicioCompleta.split('/').map(Number);
+        const [diaFim, mesFim, anoFim] = dataFimCompleta.split('/').map(Number);
+
+        const dataInicioObj = new Date(anoInicio, mesInicio - 1, diaInicio, 0, 0, 0);
+        const dataFimObj = new Date(anoFim, mesFim - 1, diaFim, 23, 59, 59);
+
+        return dataAlerta >= dataInicioObj.getTime() && dataAlerta <= dataFimObj.getTime();
+    }
+
+    async function buscarRegistrosCompleto(termo, dataInicio, dataFim) {
+        const temTermo = termo.trim() !== '';
+        const temDatas = dataInicio && dataFim;
+
+        if (!temTermo && !temDatas) {
+            setPagina(1);
+            setRegistros([]);
+            resgatarRegistros();
+            return;
+        }
+
+        try {
+            setCarregandoLista(true);
+
+            const params = new URLSearchParams();
+            if (temTermo) params.append('q', termo);
+
+            if (temDatas) {
+                // Converte dd/mm/aaaa para aaaa-mm-dd
+                const [diaInicio, mesInicio, anoInicio] = dataInicio.split('/');
+                const [diaFim, mesFim, anoFim] = dataFim.split('/');
+
+                const inicioIso = `${anoInicio}-${mesInicio.padStart(2, '0')}-${diaInicio.padStart(2, '0')}`;
+                const fimIso = `${anoFim}-${mesFim.padStart(2, '0')}-${diaFim.padStart(2, '0')}`;
+
+                params.append('dataInicio', inicioIso);
+                params.append('dataFim', fimIso);
+            }
+
+            const resposta = await api.get(`/viagens/buscar?${params.toString()}`);
+            setRegistros(resposta.data);
+            setTemMais(false);
+        } catch (err) {
+            console.error('Erro ao buscar registros:', err);
+        } finally {
+            setCarregandoLista(false);
+        }
+    }
+
+    function validarData(data) {
+        if (!data) return false;
+        const regex = /^\d{2}\/\d{2}\/\d{4}$/;
+        if (!regex.test(data)) return false;
+
+        const [dia, mes, ano] = data.split('/').map(Number);
+        if (mes < 1 || mes > 12) return false;
+        if (dia < 1 || dia > 31) return false;
+
+        // Verificação básica de dias por mês
+        const diasNoMes = new Date(ano, mes, 0).getDate();
+        return dia <= diasNoMes;
     }
 
     async function resgatarRegistros() {
@@ -173,6 +244,58 @@ export default function Registros() {
                             <div className="pesquisaPorData">
                                 <div className="pesquisaPorDataInputs">
                                     <input
+                                        type="text"
+                                        placeholder="dd/mm/aaaa"
+                                        className="inputdataCompleto"
+                                        value={dataInicioCompleta}
+                                        onChange={e => {
+                                            const valor = e.target.value;
+
+                                            let valorFormatado = valor.replace(/\D/g, '');
+                                            if (valorFormatado.length > 2) {
+                                                valorFormatado = valorFormatado.substring(0, 2) + '/' + valorFormatado.substring(2);
+                                            }
+                                            if (valorFormatado.length > 5) {
+                                                valorFormatado = valorFormatado.substring(0, 5) + '/' + valorFormatado.substring(5, 9);
+                                            }
+                                            setDataInicioCompleta(valorFormatado);
+
+                                            if (valorFormatado.length === 10 && validarData(valorFormatado) &&
+                                                dataFimCompleta && validarData(dataFimCompleta)) {
+                                                buscarRegistrosCompleto(termoBusca, valorFormatado, dataFimCompleta);
+                                            }
+                                        }}
+                                        maxLength={10}
+                                    />
+                                    <span>até</span>
+                                    <input
+                                        type="text"
+                                        placeholder="dd/mm/aaaa"
+                                        className="inputdataCompleto"
+                                        value={dataFimCompleta}
+                                        onChange={e => {
+                                            const valor = e.target.value;
+                                            let valorFormatado = valor.replace(/\D/g, '');
+                                            if (valorFormatado.length > 2) {
+                                                valorFormatado = valorFormatado.substring(0, 2) + '/' + valorFormatado.substring(2);
+                                            }
+                                            if (valorFormatado.length > 5) {
+                                                valorFormatado = valorFormatado.substring(0, 5) + '/' + valorFormatado.substring(5, 9);
+                                            }
+                                            setDataFimCompleta(valorFormatado);
+
+                                            if (valorFormatado.length === 10 && validarData(valorFormatado) &&
+                                                dataInicioCompleta && validarData(dataInicioCompleta)) {
+                                                buscarRegistrosCompleto(termoBusca, dataInicioCompleta, valorFormatado);
+                                            }
+                                        }}
+                                        maxLength={10}
+                                    />
+                                </div>
+                            </div>
+                            {/* <div className="pesquisaPorData">
+                                <div className="pesquisaPorDataInputs">
+                                    <input
                                         type="number"
                                         placeholder="DD"
                                         className="inputdata"
@@ -228,7 +351,7 @@ export default function Registros() {
                                         }}
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
                         </div>
                         <div className="divRegistros">
